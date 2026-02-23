@@ -29,6 +29,9 @@ export function Navbar() {
                     <Link href="/viewer" className={`text-sm font-medium transition-colors ${pathname === '/viewer' ? 'text-primary' : 'text-foreground/70 hover:text-foreground'}`}>
                         Çalışma Alanı
                     </Link>
+                    <Link href="/faq" className={`text-sm font-medium transition-colors ${pathname === '/faq' ? 'text-primary' : 'text-foreground/70 hover:text-foreground'}`}>
+                        SSS
+                    </Link>
                     <Link href="https://github.com/topalemirfaruk/OpenCAD-Review?tab=readme-ov-file" target="_blank" className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors">
                         Dokümantasyon
                     </Link>
