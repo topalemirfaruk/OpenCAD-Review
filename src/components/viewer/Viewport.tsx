@@ -14,7 +14,8 @@ function ModelRenderer({
     isWireframe,
     isSectioning,
     isExploded,
-    explodeFactor
+    explodeFactor,
+    setModelStructure
 }: {
     data: ArrayBuffer | string;
     ext: string;
@@ -24,6 +25,7 @@ function ModelRenderer({
     explodeFactor: number;
     setModelStructure: (structure: string[]) => void;
 }) {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const geometryOrGroup = useMemo(() => {
         try {
             if (ext === 'stl') {
@@ -87,14 +89,20 @@ function ModelRenderer({
                     child.position.copy(direction.multiplyScalar(explodeFactor));
 
                     // Also apply wireframe and clipping to children materials
-                    if (Array.isArray((child as THREE.Mesh).material)) {
-                        ((child as THREE.Mesh).material as THREE.Material[]).forEach(m => {
-                            (m as any).wireframe = isWireframe;
-                            (m as any).clippingPlanes = clippingPlanes;
-                        });
-                    } else {
-                        ((child as THREE.Mesh).material as any).wireframe = isWireframe;
-                        ((child as THREE.Mesh).material as any).clippingPlanes = clippingPlanes;
+                    const applyMaterialProps = (mat: THREE.Material) => {
+                        // Use type guard or descriptive casting to avoid 'any'
+                        const m = mat as THREE.MeshStandardMaterial;
+                        if ('wireframe' in m) {
+                            (m as unknown as { wireframe: boolean }).wireframe = isWireframe;
+                        }
+                        m.clippingPlanes = clippingPlanes;
+                    };
+
+                    const material = (child as THREE.Mesh).material;
+                    if (Array.isArray(material)) {
+                        (material as THREE.Material[]).forEach(applyMaterialProps);
+                    } else if (material) {
+                        applyMaterialProps(material as THREE.Material);
                     }
                 }
             });
