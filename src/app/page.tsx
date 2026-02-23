@@ -1,6 +1,7 @@
 import { Navbar } from '@/components/ui/Navbar';
 import { Footer } from '@/components/ui/Footer';
 import { HeroScene } from '@/components/ui/HeroScene';
+import { FAQ } from '@/components/ui/FAQ';
 import Link from 'next/link';
 import { Eye, Layers, Lock, Share2, UploadCloud, Zap } from 'lucide-react';
 
@@ -86,6 +87,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <FAQ />
 
       {/* CTA Section */}
       <section className="w-full max-w-5xl mx-auto px-4 py-24 z-10 mb-12">
