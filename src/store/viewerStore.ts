@@ -7,11 +7,19 @@ type AppState = {
     fileExt: string | null;
     isWireframe: boolean;
     isAutoRotate: boolean;
+    isSectioning: boolean;
+    isExploded: boolean;
+    explodeFactor: number;
+    modelStructure: string[];
     setActivePanel: (panel: 'left' | 'right' | null) => void;
     setUploadedFile: (file: File | null, data: ArrayBuffer | string | null, ext: string | null) => void;
     clearFile: () => void;
     toggleWireframe: () => void;
     toggleAutoRotate: () => void;
+    toggleSectioning: () => void;
+    toggleExploded: () => void;
+    setExplodeFactor: (factor: number) => void;
+    setModelStructure: (structure: string[]) => void;
 };
 
 export const useViewerStore = create<AppState>((set) => ({
@@ -21,9 +29,17 @@ export const useViewerStore = create<AppState>((set) => ({
     fileExt: null,
     isWireframe: false,
     isAutoRotate: false,
+    isSectioning: false,
+    isExploded: false,
+    explodeFactor: 0,
+    modelStructure: [],
     setActivePanel: (panel) => set({ activePanel: panel }),
     setUploadedFile: (file, data, ext) => set({ uploadedFile: file, fileData: data, fileExt: ext }),
-    clearFile: () => set({ uploadedFile: null, fileData: null, fileExt: null, isWireframe: false, isAutoRotate: false }),
+    clearFile: () => set({ uploadedFile: null, fileData: null, fileExt: null, isWireframe: false, isAutoRotate: false, isSectioning: false, isExploded: false, explodeFactor: 0, modelStructure: [] }),
     toggleWireframe: () => set((state) => ({ isWireframe: !state.isWireframe })),
     toggleAutoRotate: () => set((state) => ({ isAutoRotate: !state.isAutoRotate })),
+    toggleSectioning: () => set((state) => ({ isSectioning: !state.isSectioning })),
+    toggleExploded: () => set((state) => ({ isExploded: !state.isExploded })),
+    setExplodeFactor: (factor) => set({ explodeFactor: factor }),
+    setModelStructure: (structure) => set({ modelStructure: structure }),
 }));
