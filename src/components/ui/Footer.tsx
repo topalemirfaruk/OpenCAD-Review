@@ -1,4 +1,5 @@
-
+import Link from 'next/link';
+import { Github } from 'lucide-react';
 
 export function Footer() {
     return (
@@ -7,10 +8,10 @@ export function Footer() {
                 <div className="text-foreground/60 text-sm">
                     &copy; {new Date().getFullYear()} OpenCAD Review. Açık kaynak kodlu ve ücretsizdir.
                 </div>
-                <div className="flex items-center gap-6 text-sm text-foreground/60">
-                    <a href="#" className="hover:text-primary transition-colors">Kullanım Şartları</a>
-                    <a href="#" className="hover:text-primary transition-colors">Gizlilik</a>
-                    <a href="https://github.com/emirft/opencad-review" className="hover:text-primary transition-colors" target="_blank" rel="noreferrer">GitHub</a>
+                <div className="flex items-center gap-4">
+                    <Link href="https://github.com/topalemirfaruk/OpenCAD-Review?tab=readme-ov-file" target="_blank" className="w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-foreground/60 hover:text-primary hover:border-primary/50 transition-all">
+                        <Github className="w-5 h-5" />
+                    </Link>
                 </div>
             </div>
         </footer>

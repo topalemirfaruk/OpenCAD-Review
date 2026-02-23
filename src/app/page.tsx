@@ -36,7 +36,7 @@ export default function Home() {
               <UploadCloud className="w-5 h-5" />
               <span>Görüntüleyiciyi Aç</span>
             </Link>
-            <Link href="https://github.com/emirft/opencad-review" target="_blank" className="h-14 px-8 rounded-xl glass-panel text-foreground font-semibold text-lg flex items-center gap-2 hover:bg-surfaceAlt transition-all group">
+            <Link href="https://github.com/topalemirfaruk/OpenCAD-Review?tab=readme-ov-file" target="_blank" className="h-14 px-8 rounded-xl glass-panel text-foreground font-semibold text-lg flex items-center gap-2 hover:bg-surfaceAlt transition-all group">
               <span>GitHub&apos;da İncele</span>
               <span className="group-hover:translate-x-1 transition-transform">→</span>
             </Link>

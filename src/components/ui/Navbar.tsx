@@ -29,13 +29,13 @@ export function Navbar() {
                     <Link href="/viewer" className={`text-sm font-medium transition-colors ${pathname === '/viewer' ? 'text-primary' : 'text-foreground/70 hover:text-foreground'}`}>
                         Çalışma Alanı
                     </Link>
-                    <Link href="https://github.com/emirft/opencad-review" target="_blank" className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors">
+                    <Link href="https://github.com/topalemirfaruk/OpenCAD-Review?tab=readme-ov-file" target="_blank" className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors">
                         Dokümantasyon
                     </Link>
                 </nav>
 
                 <div className="flex items-center gap-4">
-                    <Link href="https://github.com/emirft/opencad-review" target="_blank" className="text-foreground/70 hover:text-foreground transition-colors p-2 hover:bg-white/5 rounded-full">
+                    <Link href="https://github.com/topalemirfaruk/OpenCAD-Review?tab=readme-ov-file" target="_blank" className="text-foreground/70 hover:text-foreground transition-colors p-2 hover:bg-white/5 rounded-full">
                         <Github className="w-5 h-5" />
                     </Link>
                     <Link href="/viewer" className="hidden sm:flex h-9 items-center justify-center px-4 rounded-md bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors gap-2 shadow-[0_0_15px_rgba(14,165,233,0.3)]">
