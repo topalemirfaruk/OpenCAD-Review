@@ -1,5 +1,3 @@
-import { Navbar } from '@/components/ui/Navbar';
-import { Footer } from '@/components/ui/Footer';
 import { HeroScene } from '@/components/ui/HeroScene';
 import Link from 'next/link';
 import { Eye, Layers, Lock, Share2, UploadCloud, Zap } from 'lucide-react';
@@ -7,8 +5,6 @@ import { Eye, Layers, Lock, Share2, UploadCloud, Zap } from 'lucide-react';
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center">
-      <Navbar />
-
       {/* Hero Section */}
       <section className="relative w-full min-h-screen flex flex-col items-center justify-center pt-24 px-4">
         <HeroScene />
@@ -101,8 +97,6 @@ export default function Home() {
           </Link>
         </div>
       </section>
-
-      <Footer />
     </main>
   );
 }

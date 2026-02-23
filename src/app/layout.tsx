@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   description: "Tarayıcıda CAD Görüntüleyici & İnceleme & Paylaşım. STEP/STP, STL, OBJ desteği. Güvenli işbirliği.",
 };
 
+import { Navbar } from "@/components/ui/Navbar";
+import { Footer } from "@/components/ui/Footer";
+import { PageTransition } from "@/components/ui/PageTransition";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -16,9 +20,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.className} bg-background text-foreground antialiased min-h-screen bg-grid`}>
-        {/* Navbar only shown on landing pages, handled per-page or globally via checks. We'll add it globally and hide in viewer if needed. */}
-        {children}
+      <body className={`${outfit.className} bg-background text-foreground antialiased min-h-screen bg-grid relative`}>
+        {/* Global Background Glows */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[120px]" />
+        </div>
+
+        <Navbar />
+        <PageTransition>
+          {children}
+        </PageTransition>
+        <Footer />
       </body>
     </html>
   );

@@ -1,6 +1,5 @@
 'use client';
 
-import { Navbar } from '@/components/ui/Navbar';
 import { LeftPanel } from '@/components/viewer/LeftPanel';
 import { RightPanel } from '@/components/viewer/RightPanel';
 import { Viewport } from '@/components/viewer/Viewport';
@@ -12,8 +11,6 @@ export default function ViewerPage() {
 
     return (
         <main className="flex min-h-screen flex-col bg-[#020617] overflow-hidden relative">
-            <Navbar />
-
             {/* Viewer Workspace */}
             <div className="flex-1 flex w-full h-full relative mt-16">
 
