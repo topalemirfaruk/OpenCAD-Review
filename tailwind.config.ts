@@ -9,8 +9,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "#020617", // slate-950
+        foreground: "#f8fafc", // slate-50
+        surface: "#0f172a", // slate-900
+        surfaceAlt: "#1e293b", // slate-800
+        primary: "#0ea5e9", // sky-500
+        primaryGlow: "#38bdf8", // sky-400
+        accent: "#10b981", // emerald-500
+        border: "#334155", // slate-700
+      },
+      backgroundImage: {
+        'grid-pattern': "linear-gradient(to right, #1e293b 1px, transparent 1px), linear-gradient(to bottom, #1e293b 1px, transparent 1px)",
       },
     },
   },

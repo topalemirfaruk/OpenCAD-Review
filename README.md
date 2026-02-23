@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OpenCAD Review (OSS) 🧊
 
-## Getting Started
+> Mühendislik ekipleri için tarayıcı üzerinde çalışan, kurulum gerektirmeyen **güvenli**, **açık kaynak kodlu** 3D model (CAD) görüntüleyici ve işbirliği aracı.
 
-First, run the development server:
+![OpenCAD Review Homepage](./public/screenshot-home.png)
 
+## 📖 Proje Hakkında
+
+Mekanik tasarım, üretim ve mühendislik ekiplerinin en büyük dertlerinden biri olan CAD dosyası (STL, OBJ, STEP vb.) görüntüleme ve üzerinde geri bildirim bırakma sürecini tamamen tarayıcı ortamına taşıyoruz.
+
+Ağır ve pahalı masaüstü yazılımlara ihtiyaç duymadan, dosyalarınızı tarayıcıya sürükleyip bırakarak anında inceleyin, parça ayrıştırma yapın ve ekip arkadaşlarınızla modeller üzerinde notlar (pin) bırakın. 
+
+Proje **Tamamen Açık Kaynak Kodludur (OSS)**. Hassas ve gizli projelerinizi kendi sunucunuzda *self-host* ederek %100 gizlilik ve güvenlik sağlayabilirsiniz. Local Conversion modu ile dosyalarınız asla üçüncü parti sunuculara yüklenmez.
+
+![OpenCAD Review Workspace](./public/screenshot-viewer.png)
+
+## ✨ Öne Çıkan Özellikler
+
+- **Tarayıcıda 3D Görüntüleme**: WebGL ve Three.js altyapısı ile yüksek performanslı render.
+- **Tak & Çalıştır Formats**: Anında `.stl` ve `.obj` desteği. Sürükle-bırak yöntemiyle saniyeler içinde parse edilir. (STEP desteği için çalışmalar sürüyor).
+- **Premium Arayüz & UX**: Karanlık mod ("cyberpunk grid"), cam paneller (glassmorphism) ve animasyonlu pürüzsüz geçişlerle donatılmış mühendis odaklı minimal arayüz.
+- **İnteraktif Araçlar**: Tel Kafes (Wireframe) görünümü, otomatik döndürme, ve model hiyerarşisi ağacı.
+- **Local Privacy-First**: Tarayıcıda (istemci tarafında) modeller işlenir. Sunucuya ham CAD dosyalarınız **asla** gönderilmez. (Local mode).
+- **Yorumlar & İşbirliği (Geliştiriliyor)**: Tasarım üzerinde tıklanılan noktaya pin/not bırakma ve ekip arkadaşlarıyla koordinasyon (MVP sürümünde sadece arayüz mocking'i vardır).
+
+## 🚀 Başlangıç & Kurulum (Geliştirici)
+
+Proje modern Node.js ve React mimarisi kullanılarak oluşturulmuştur. Kendi bilgisayarınızda (veya sunucunuzda) çalıştırmak için aşağıdaki adımları takip edebilirsiniz:
+
+### Ön Gereksinimler
+- Node.js (v18 veya daha yeni bir sürüm)
+- npm veya yarn
+
+### Kurulum Adımları
+1. Repoyu bilgisayarınıza klonlayın:
+```bash
+git clone https://github.com/topalemirfaruk/OpenCAD-Review.git
+```
+2. Proje dizinine girin:
+```bash
+cd OpenCAD-Review
+```
+3. Gerekli kütüphane ve modülleri yükleyin:
+```bash
+npm install
+```
+4. Geliştirme (development) sunucusunu başlatın:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
+5. Tarayıcınızdan `http://localhost:3000` adresine giderek OpenCAD Review dünyasına giriş yapın!
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠 Kullanılan Teknolojiler
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **[Next.js 14](https://nextjs.org/)**: React tabanlı modern web iskeleti ve App Router mimarisi.
+- **[Three.js](https://threejs.org/) & [@react-three/fiber](https://docs.pmnd.rs/react-three-fiber/getting-started/introduction)**: Yüksek performanslı, deklaratif 3D grafik render motoru.
+- **[Tailwind CSS](https://tailwindcss.com/)**: Özelleştirilmiş "Premium Dark" estetik için yardımcı CSS framework'ü.
+- **[Framer Motion](https://www.framer.com/motion/)**: Akıcı hover, enter/exit animasyonları ve sayfa geçişleri.
+- **[Zustand](https://zustand-demo.pmnd.rs/)**: Minimal ama güçlü, Redux alternatifi global state yönetim aracı.
+- **[Lucide React](https://lucide.dev/)**: Net, modern ve okunaklı SVG arayüz ikonları.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🤝 Katkıda Bulunma
 
-## Learn More
+Bu projenin gelişmesi için topluluk desteğine ihtiyacımız var! Hataları bildirmek (Issues), yeni özellikler önermek veya kod katkısında bulunmak (Pull Request) isterseniz lütfen GitHub reposu üzerinden etkileşime geçin.
 
-To learn more about Next.js, take a look at the following resources:
+## 📜 Lisans
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Bu proje, açık kaynak ideolojisine sıkı sıkıya bağlıdır ve herkesin ücretsiz, şeffaf bir şekilde kullanabilmesini destekler. Projenin açık kaynak yapısı devam edecektir. 
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+*Tasarlanan sistemler her zaman daha iyi olabilir. İnceleyin, yorumlayın ve inşa etmeye devam edin!*
