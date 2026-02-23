@@ -12,7 +12,7 @@ Ağır ve pahalı masaüstü yazılımlara ihtiyaç duymadan, dosyalarınızı t
 
 Proje **Tamamen Açık Kaynak Kodludur (OSS)**. Hassas ve gizli projelerinizi kendi sunucunuzda *self-host* ederek %100 gizlilik ve güvenlik sağlayabilirsiniz. Local Conversion modu ile dosyalarınız asla üçüncü parti sunuculara yüklenmez.
 
-![OpenCAD Review Workspace](./public/screenshot-viewer.png)
+![OpenCAD Review Workspace](./public/screenshots/viewer-dragon.png)
 
 ## ✨ Öne Çıkan Özellikler
 
