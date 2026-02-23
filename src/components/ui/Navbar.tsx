@@ -1,12 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Box, Github, UploadCloud } from 'lucide-react';
+import { Box, Github, UploadCloud, UserCircle } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { AuthModal } from './AuthModal';
 
 export function Navbar() {
     const pathname = usePathname();
+    const [isAuthOpen, setIsAuthOpen] = useState(false);
 
     return (
         <motion.header
@@ -38,6 +41,13 @@ export function Navbar() {
                 </nav>
 
                 <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => setIsAuthOpen(true)}
+                        className="hidden sm:flex items-center gap-2 text-foreground/70 hover:text-primary transition-colors text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-white/5"
+                    >
+                        <UserCircle className="w-5 h-5" />
+                        Giriş Yap
+                    </button>
                     <Link href="https://github.com/topalemirfaruk/OpenCAD-Review?tab=readme-ov-file" target="_blank" className="text-foreground/70 hover:text-foreground transition-colors p-2 hover:bg-white/5 rounded-full">
                         <Github className="w-5 h-5" />
                     </Link>
@@ -47,6 +57,8 @@ export function Navbar() {
                     </Link>
                 </div>
             </div>
+
+            <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
         </motion.header>
     );
 }
