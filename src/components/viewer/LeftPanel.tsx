@@ -13,6 +13,7 @@ export function LeftPanel() {
         isSectioning,
         isExploded,
         explodeFactor,
+        modelStructure,
         toggleWireframe,
         toggleAutoRotate,
         toggleSectioning,
@@ -52,6 +53,20 @@ export function LeftPanel() {
                 <div>
                     <h3 className="text-xs uppercase font-bold text-foreground/50 tracking-wider mb-3">Görünüm Seçenekleri</h3>
                     <div className="space-y-2">
+                        <button
+                            onClick={toggleWireframe}
+                            className={`w-full text-left px-3 py-2 text-sm rounded border transition-colors flex items-center gap-2 ${isWireframe ? 'bg-primary/20 border-primary/50 text-primary' : 'bg-surfaceAlt/50 hover:bg-surfaceAlt border-transparent hover:border-border text-foreground/70'}`}
+                        >
+                            <Settings2 className="w-4 h-4" />
+                            Tel Kafes (Wireframe) Göster
+                        </button>
+                        <button
+                            onClick={toggleAutoRotate}
+                            className={`w-full text-left px-3 py-2 text-sm rounded border transition-colors flex items-center gap-2 ${isAutoRotate ? 'bg-primary/20 border-primary/50 text-primary' : 'bg-surfaceAlt/50 hover:bg-surfaceAlt border-transparent hover:border-border text-foreground/70'}`}
+                        >
+                            <Settings2 className="w-4 h-4" />
+                            Otomatik Döndürme
+                        </button>
                         <button
                             onClick={toggleSectioning}
                             className={`w-full text-left px-3 py-2 text-sm rounded border transition-colors flex items-center gap-2 ${isSectioning ? 'bg-accent/20 border-accent/50 text-accent' : 'bg-surfaceAlt/50 hover:bg-surfaceAlt border-transparent hover:border-border text-foreground/70'}`}

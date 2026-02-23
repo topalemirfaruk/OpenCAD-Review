@@ -106,7 +106,7 @@ function ModelRenderer({
 }
 
 export function Viewport() {
-    const { fileData, fileExt, isWireframe, isAutoRotate, isSectioning, isExploded, explodeFactor } = useViewerStore();
+    const { fileData, fileExt, isWireframe, isAutoRotate, isSectioning, isExploded, explodeFactor, setModelStructure } = useViewerStore();
 
     return (
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#0f172a] to-[#020617] pt-16">
@@ -126,6 +126,7 @@ export function Viewport() {
                                 isSectioning={isSectioning}
                                 isExploded={isExploded}
                                 explodeFactor={explodeFactor}
+                                setModelStructure={setModelStructure}
                             />
                         )}
                     </Stage>
