@@ -1,12 +1,22 @@
-'use client';
-
-import { MessageSquare, Share2, CornerDownRight } from 'lucide-react';
+import { useState } from 'react';
+import { MessageSquare, Share2, CornerDownRight, Check } from 'lucide-react';
 import { useViewerStore } from '@/store/viewerStore';
 
 export function RightPanel() {
     const { uploadedFile } = useViewerStore();
+    const [copied, setCopied] = useState(false);
 
     if (!uploadedFile) return null;
+
+    const handleShare = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Kopyalama başarısız:', err);
+        }
+    };
 
     return (
         <div className="w-80 h-full glass-panel border-l border-border/50 flex flex-col absolute right-0 top-0 pt-16 z-20">
@@ -14,8 +24,18 @@ export function RightPanel() {
                 <h2 className="font-semibold text-sm flex items-center gap-2">
                     <MessageSquare className="w-4 h-4 text-accent" /> Yorumlar & İşbirliği
                 </h2>
-                <button className="text-primary hover:text-primaryGlow transition-colors p-1.5 rounded-md hover:bg-primary/10">
-                    <Share2 className="w-4 h-4" />
+                <button
+                    onClick={handleShare}
+                    className={`transition-all duration-300 p-1.5 rounded-md flex items-center gap-1.5 ${copied ? 'bg-green-500/20 text-green-500' : 'text-primary hover:text-primaryGlow hover:bg-primary/10'}`}
+                >
+                    {copied ? (
+                        <>
+                            <Check className="w-4 h-4" />
+                            <span className="text-[10px] font-bold">Kopyalandı!</span>
+                        </>
+                    ) : (
+                        <Share2 className="w-4 h-4" />
+                    )}
                 </button>
             </div>
 
