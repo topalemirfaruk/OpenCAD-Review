@@ -27,8 +27,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             const provider = platform.toLowerCase() === 'gmail' ? 'google' : 'github';
             await loginWithOAuth(provider as 'google' | 'github');
             // Redirect handled by Supabase
-        } catch (error: any) {
-            setErrorMsg(error.message || 'Sosyal giriş başarısız oldu.');
+        } catch (error: unknown) {
+            setErrorMsg(error instanceof Error ? error.message : 'Sosyal giriş başarısız oldu.');
             setIsLoading(null);
         }
     };
@@ -55,8 +55,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     onClose();
                 }, 1500);
             }
-        } catch (error: any) {
-            setErrorMsg(error.message || 'İşlem sırasında bir hata oluştu.');
+        } catch (error: unknown) {
+            setErrorMsg(error instanceof Error ? error.message : 'İşlem sırasında bir hata oluştu.');
         } finally {
             setIsLoading(null);
         }

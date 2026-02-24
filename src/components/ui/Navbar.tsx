@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Box, Github, UploadCloud, LogOut, UserCircle } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
@@ -59,8 +60,15 @@ export function Navbar() {
                         ) : (
                             <div className="flex items-center gap-2">
                                 <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
-                                    <div className="w-6 h-6 rounded-lg overflow-hidden border border-primary/30">
-                                        <img src={user?.avatar} alt={user?.name} className="w-full h-full object-cover" />
+                                    <div className="w-6 h-6 rounded-lg overflow-hidden border border-primary/30 relative">
+                                        {user?.avatar && (
+                                            <Image
+                                                src={user.avatar}
+                                                alt={user.name || 'User'}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        )}
                                     </div>
                                     <div className="flex flex-col text-left">
                                         <span className="text-[11px] font-bold text-foreground leading-none">{user?.name}</span>
