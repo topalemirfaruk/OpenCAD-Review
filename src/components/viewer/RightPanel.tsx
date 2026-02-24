@@ -1,11 +1,11 @@
-// import { useState } from 'react';
+import { useState } from 'react';
 import { MessageSquare, Share2, CornerDownRight } from 'lucide-react';
 import { useViewerStore } from '@/store/viewerStore';
-// import { ShareModal } from './ShareModal';
+import { ShareModal } from './ShareModal';
 
 export function RightPanel() {
     const { uploadedFile } = useViewerStore();
-    // const [isShareOpen, setIsShareOpen] = useState(false);
+    const [isShareOpen, setIsShareOpen] = useState(false);
 
     if (!uploadedFile) return null;
 
@@ -16,25 +16,18 @@ export function RightPanel() {
                     <MessageSquare className="w-4 h-4 text-accent" /> Yorumlar & İşbirliği
                 </h2>
                 <button
-                    onClick={() => {
-                        alert("Bu özellik geliştirme aşamasındadır. Çok yakında bulut paylaşımı aktif olacaktır!");
-                    }}
-                    className="text-foreground/40 hover:text-accent transition-colors p-1.5 rounded-md hover:bg-accent/10 relative group"
+                    onClick={() => setIsShareOpen(true)}
+                    className="text-primary hover:text-primaryGlow transition-colors p-1.5 rounded-md hover:bg-primary/10"
                 >
                     <Share2 className="w-4 h-4" />
-                    <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
-                    </span>
                 </button>
             </div>
 
-            {/* ShareModal disabled for dev mode notice */}
-            {/* <ShareModal
+            <ShareModal
                 isOpen={isShareOpen}
                 onClose={() => setIsShareOpen(false)}
                 modelName={uploadedFile instanceof File ? uploadedFile.name : 'Model.stl'}
-            /> */}
+            />
 
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
                 {/* Mock Comments */}
