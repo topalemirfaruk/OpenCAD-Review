@@ -1,6 +1,7 @@
+'use client';
+
 import { create } from 'zustand';
-import { supabase } from '../lib/supabase';
-import { User as SupabaseUser } from '@supabase/supabase-js';
+import { useSession, signIn, signOut } from 'next-auth/react';
 
 interface User {
     id: string;
@@ -14,82 +15,40 @@ interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    initialize: () => Promise<void>;
-    login: (email: string, password: string) => Promise<void>;
-    register: (name: string, email: string, password: string) => Promise<void>;
+    initialize: () => void;
     loginWithOAuth: (provider: 'google' | 'github') => Promise<void>;
     logout: () => Promise<void>;
-    resetPassword: (email: string) => Promise<void>;
 }
 
-const mapSupabaseUser = (user: SupabaseUser | null): User | null => {
-    if (!user) return null;
-    return {
-        id: user.id,
-        name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-        email: user.email || '',
-        avatar: user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`,
-        role: 'Engineer',
-    };
-};
-
-export const useAuthStore = create<AuthState>((set) => ({
+// Zustand store - provides global access to auth state
+export const useAuthStore = create<AuthState>(() => ({
     user: null,
     isAuthenticated: false,
-    isLoading: true,
-
-    initialize: async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        set({
-            user: mapSupabaseUser(session?.user || null),
-            isAuthenticated: !!session?.user,
-            isLoading: false
-        });
-
-        supabase.auth.onAuthStateChange((_event, session) => {
-            set({
-                user: mapSupabaseUser(session?.user || null),
-                isAuthenticated: !!session?.user
-            });
-        });
-    },
-
-    login: async (email, password) => {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-    },
-
-    register: async (name, email, password) => {
-        const { error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    full_name: name,
-                },
-            },
-        });
-        if (error) throw error;
-    },
-
+    isLoading: false,
+    initialize: () => { }, // Handled by SessionProvider + useAuthSync below
     loginWithOAuth: async (provider) => {
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider,
-            options: {
-                redirectTo: `${window.location.origin}/viewer`,
-            },
-        });
-        if (error) throw error;
+        await signIn(provider, { callbackUrl: '/viewer' });
     },
-
     logout: async () => {
-        await supabase.auth.signOut();
-    },
-
-    resetPassword: async (email) => {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/auth/callback`,
-        });
-        if (error) throw error;
+        await signOut({ callbackUrl: '/' });
     },
 }));
+
+// Hook to sync NextAuth session with the Zustand store
+// Use this in top-level components (e.g., Navbar)
+export function useAuthSync() {
+    const { data: session, status } = useSession();
+
+    const isLoading = status === 'loading';
+    const isAuthenticated = status === 'authenticated';
+
+    const user: User | null = session?.user ? {
+        id: (session.user as { id?: string }).id || session.user.email || '',
+        name: session.user.name || session.user.email?.split('@')[0] || 'User',
+        email: session.user.email || '',
+        avatar: session.user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${session.user.email}`,
+        role: 'Engineer',
+    } : null;
+
+    return { user, isAuthenticated, isLoading };
+}

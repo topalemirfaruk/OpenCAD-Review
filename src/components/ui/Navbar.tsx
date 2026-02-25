@@ -2,21 +2,18 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { Box, Github, UploadCloud, LogOut, UserCircle } from 'lucide-react';
-import { useAuthStore } from '../../store/authStore';
-import { useEffect, useState } from 'react';
+import { useAuthSync } from '../../store/authStore';
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { AuthModal } from './AuthModal';
 
 export function Navbar() {
     const pathname = usePathname();
-    const { isAuthenticated, user, logout, initialize } = useAuthStore();
+    const { isAuthenticated, user, isLoading } = useAuthSync();
     const [isAuthOpen, setIsAuthOpen] = useState(false);
-
-    useEffect(() => {
-        initialize();
-    }, [initialize]);
 
     return (
         <>
@@ -49,7 +46,9 @@ export function Navbar() {
                     </nav>
 
                     <div className="flex items-center gap-3">
-                        {!isAuthenticated ? (
+                        {isLoading ? (
+                            <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                        ) : !isAuthenticated ? (
                             <button
                                 onClick={() => setIsAuthOpen(true)}
                                 className="hidden sm:flex items-center gap-2 text-foreground/80 hover:text-primary transition-all text-xs font-bold px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-primary/50 hover:bg-primary/5 group/btn"
@@ -76,7 +75,7 @@ export function Navbar() {
                                     </div>
                                 </div>
                                 <button
-                                    onClick={() => logout()}
+                                    onClick={() => signOut({ callbackUrl: '/' })}
                                     className="p-2 text-foreground/40 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all group"
                                     title="Çıkış Yap"
                                 >
@@ -96,7 +95,7 @@ export function Navbar() {
                 </div>
             </motion.header>
 
-            {/* Premium Modals - Moved outside header to resolve centering/clipping issues */}
+            {/* Auth Modal */}
             <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
         </>
     );
