@@ -1,100 +1,418 @@
-import { HeroScene } from '@/components/ui/HeroScene';
+'use client';
+
 import Link from 'next/link';
-import { Eye, Layers, Lock, Share2, UploadCloud, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Eye, Layers, Lock, Share2, UploadCloud, Zap, ArrowRight, Box, Star, CheckCircle2, Globe, Cpu, ShieldCheck } from 'lucide-react';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.1, duration: 0.6, ease: 'easeOut' as const },
+  }),
+};
+
+const features = [
+  {
+    icon: <Zap className="w-5 h-5" />,
+    color: 'from-yellow-500/20 to-orange-500/10',
+    iconColor: 'text-yellow-400',
+    title: "Sıfır Kurulum",
+    desc: "Masaüstü CAD yazılımına gerek yok. Tarayıcınızda anında açın ve görüntüleyin.",
+  },
+  {
+    icon: <Share2 className="w-5 h-5" />,
+    color: 'from-primary/20 to-primaryGlow/10',
+    iconColor: 'text-primaryGlow',
+    title: "Anlık Paylaşım",
+    desc: "Tek bağlantı ile ekibinizle veya müşterilerinizle paylaşın. Hesap şartı yok.",
+  },
+  {
+    icon: <Lock className="w-5 h-5" />,
+    color: 'from-teal/20 to-teal/5',
+    iconColor: 'text-teal',
+    title: "Gizlilik Önce",
+    desc: "Modelleriniz sunucuya gönderilmez. Her şey yerel olarak çalışır.",
+  },
+  {
+    icon: <Layers className="w-5 h-5" />,
+    color: 'from-purple-500/20 to-purple-500/5',
+    iconColor: 'text-purple-400',
+    title: "Parça Hiyerarşisi",
+    desc: "Montaj dosyalarındaki alt bileşenleri görüntüleyin, filtreleyin ve yönetin.",
+  },
+  {
+    icon: <Eye className="w-5 h-5" />,
+    color: 'from-blue-500/20 to-blue-500/5',
+    iconColor: 'text-blue-400',
+    title: "Kesit & Patlatma",
+    desc: "İç yapıyı göreve hazır kesit düzlemleri ve patlatma görünümleriyle inceleyin.",
+  },
+  {
+    icon: <Globe className="w-5 h-5" />,
+    color: 'from-accent/20 to-accent/5',
+    iconColor: 'text-accentGlow',
+    title: "Açık Kaynak",
+    desc: "Tamamen açık kaynat. Kendi sunucunuzda barındırın, katkıda bulunun.",
+  },
+];
+
+const stats = [
+  { value: "3", label: "Desteklenen Format", suffix: "+" },
+  { value: "0", label: "Sunucu Yüklemesi", suffix: "KB" },
+  { value: "100", label: "Açık Kaynak", suffix: "%" },
+  { value: "∞", label: "Ücretsiz Kullanım", suffix: "" },
+];
+
+const steps = [
+  { num: "01", title: "Dosyayı Yükle", desc: "STL veya OBJ dosyanızı sürükleyin ya da seçin." },
+  { num: "02", title: "3D'de İncele", desc: "360° döndürün, yakınlaştırın, parçaları gizleyin." },
+  { num: "03", title: "Ekiple Paylaş", desc: "Bağlantıyı kopyalayıp ekibinizle anında paylaşın." },
+];
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center">
-      {/* Hero Section */}
-      <section className="relative w-full min-h-screen flex flex-col items-center justify-center pt-24 px-4">
-        <HeroScene />
+    <main className="flex min-h-screen flex-col items-center overflow-hidden">
 
-        <div className="max-w-4xl mx-auto text-center z-10 space-y-8 mt-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-panel border-primary/30 text-primary text-sm font-medium mb-4">
+      {/* ── HERO ─────────────────────────────────────── */}
+      <section className="relative w-full min-h-screen flex flex-col items-center justify-center px-4 pt-20">
+        {/* Glows */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-primary/10 rounded-full blur-[120px]" />
+          <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-accent/8 rounded-full blur-[100px]" />
+          <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] bg-primaryDark/10 rounded-full blur-[100px]" />
+        </div>
+
+        {/* Grid */}
+        <div className="absolute inset-0 bg-grid opacity-60 pointer-events-none" />
+
+        {/* Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="relative z-10 mb-6"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primaryGlow text-sm font-semibold">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primaryGlow opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primaryGlow" />
             </span>
-            <span>Açık Kaynak Kodlu & v1.0.0</span>
+            Açık Kaynak &amp; Ücretsiz — v1.0.0
           </div>
+        </motion.div>
 
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-glow">
-            CAD Dosyalarınızı <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primaryGlow">Tarayıcıda İnceleyin</span>
+        {/* Heading */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.1 }}
+          className="relative z-10 text-center max-w-5xl mx-auto"
+        >
+          <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold tracking-tight leading-[1.05] mb-6">
+            <span className="text-foreground">CAD Dosyalarını</span>
+            <br />
+            <span className="gradient-text">Tarayıcıda İncele</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-foreground/70 max-w-2xl mx-auto leading-relaxed">
-            Mühendislik ekipleri için <strong className="text-foreground">STL, OBJ</strong> (ve yakında STEP) formatlarında güvenli 3D işbirliği, paylaşım ve inceleme aracı.
+          <p className="text-lg md:text-xl text-foreground/55 max-w-2xl mx-auto leading-relaxed mb-10">
+            Mühendislik ekipleri için <strong className="text-foreground/80">STL</strong>, <strong className="text-foreground/80">OBJ</strong> ve yakında{' '}
+            <strong className="text-foreground/80">STEP</strong> desteğiyle — kurulum yok, sunucu yok, limit yok.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-            <Link href="/viewer" className="h-14 px-8 rounded-xl bg-primary text-primary-foreground font-semibold text-lg flex items-center justify-center gap-2 hover:bg-primary/90 hover:scale-105 transition-all shadow-[0_0_30px_rgba(14,165,233,0.4)]">
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+            <Link
+              href="/viewer"
+              className="btn-primary h-14 px-8 rounded-2xl text-white font-bold text-base flex items-center gap-2.5 group"
+            >
               <UploadCloud className="w-5 h-5" />
-              <span>Görüntüleyiciyi Aç</span>
+              Görüntüleyiciyi Aç
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link href="https://github.com/topalemirfaruk/OpenCAD-Review?tab=readme-ov-file" target="_blank" className="h-14 px-8 rounded-xl glass-panel text-foreground font-semibold text-lg flex items-center gap-2 hover:bg-surfaceAlt transition-all group">
-              <span>GitHub&apos;da İncele</span>
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            <Link
+              href="https://github.com/topalemirfaruk/OpenCAD-Review"
+              target="_blank"
+              className="h-14 px-8 rounded-2xl glass-panel text-foreground/80 hover:text-foreground font-semibold text-base flex items-center gap-2.5 hover:border-primary/30 transition-all group"
+            >
+              <Star className="w-4 h-4 text-yellow-400" />
+              GitHub&apos;da İncele
             </Link>
           </div>
 
-          <div className="flex items-center justify-center gap-8 pt-12 text-sm text-foreground/50">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded glass-panel flex items-center justify-center text-primary font-mono text-xs font-bold border-primary/20">.STL</div>
-              <span>Destekleniyor</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded glass-panel flex items-center justify-center text-accent font-mono text-xs font-bold border-accent/20">.OBJ</div>
-              <span>Destekleniyor</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded glass-panel flex items-center justify-center text-foreground/40 font-mono text-xs font-bold border-foreground/10">.STP</div>
-              <span>Yakında</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="w-full max-w-7xl mx-auto px-4 py-32 z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Mühendisler İçin Tasarlandı</h2>
-          <p className="text-foreground/70 max-w-2xl mx-auto">Hiçbir kurulum gerektirmeden, doğrudan tarayıcınız üzerinden çalışabilen güçlü araçlar.</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            { icon: <Zap className="w-6 h-6 text-yellow-500" />, title: "Sıfır Kurulum", desc: "Masaüstü CAD yazılımına ihtiyaç duymadan cihaz bağımsız görüntüleme." },
-            { icon: <Share2 className="w-6 h-6 text-primary" />, title: "Paylaşılabilir Linkler", desc: "Tasarımınızı tek tıkla iş arkadaşlarınızla veya müşterilerle paylaşın." },
-            { icon: <Lock className="w-6 h-6 text-accent" />, title: "Local Privacy-First", desc: "Gizli modelleriniz sunucuya yüklenmeden sadece cihazınızda işlenir." },
-            { icon: <Layers className="w-6 h-6 text-purple-500" />, title: "Parça Hiyerarşisi", desc: "Montaj dosyalarındaki alt parçaları inceleyin ve gizleyin." },
-            { icon: <Eye className="w-6 h-6 text-blue-400" />, title: "Kesit ve Patlatma", desc: "Modellerin iç yapısını görmek için interaktif araçları kullanın." },
-            { icon: <div className="w-6 h-6 text-orange-500 font-bold flex items-center justify-center">OSS</div>, title: "Açık Kaynak & Ücretsiz", desc: "Kendi sunucunuzda (self-host) barındırma özgürlüğüne sahip olun." },
-          ].map((feature, i) => (
-            <div key={i} className="glass-panel p-8 rounded-2xl flex flex-col items-start gap-4 hover:-translate-y-1 transition-transform border-border/40 hover:border-primary/50 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] -z-10 group-hover:bg-primary/10 transition-colors"></div>
-              <div className="w-12 h-12 rounded-xl bg-surfaceAlt flex items-center justify-center border border-border">
-                {feature.icon}
+          {/* Format badges */}
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            {[
+              { ext: '.STL', color: 'border-primary/40 text-primaryGlow bg-primary/10', label: 'Destekleniyor' },
+              { ext: '.OBJ', color: 'border-accent/40 text-accentGlow bg-accent/10', label: 'Destekleniyor' },
+              { ext: '.STEP', color: 'border-white/10 text-foreground/30 bg-white/5', label: 'Yakında' },
+            ].map(f => (
+              <div key={f.ext} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold ${f.color}`}>
+                <span className="font-mono">{f.ext}</span>
+                <span className="opacity-70">{f.label}</span>
               </div>
-              <h3 className="text-xl font-bold">{feature.title}</h3>
-              <p className="text-foreground/70 leading-relaxed">{feature.desc}</p>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Floating 3D Preview Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="relative z-10 mt-20 w-full max-w-3xl mx-auto"
+        >
+          <div className="relative rounded-3xl glass-card border-primary/20 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5" />
+            <div className="relative p-8 flex items-center justify-center min-h-[260px]">
+              {/* Mock 3D viewer UI */}
+              <div className="absolute top-4 left-4 flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-500/60" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+                <div className="w-3 h-3 rounded-full bg-green-500/60" />
+              </div>
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs text-foreground/30 font-mono">
+                opencad.vercel.app/viewer
+              </div>
+
+              {/* Center visual */}
+              <div className="flex flex-col items-center gap-4">
+                <motion.div
+                  animate={{ rotateY: [0, 15, -15, 0], rotateX: [0, 10, -5, 0] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                  className="w-32 h-32 relative"
+                >
+                  <div className="absolute inset-0 border-2 border-primary/40 rounded-2xl rotate-12" />
+                  <div className="absolute inset-2 border border-accent/30 rounded-xl -rotate-6" />
+                  <div className="absolute inset-4 border border-primaryGlow/20 rounded-xl rotate-3" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Box className="w-12 h-12 text-primary/60" />
+                  </div>
+                </motion.div>
+                <div className="text-center">
+                  <p className="text-foreground/60 text-sm font-medium">model_assembly.stl</p>
+                  <p className="text-foreground/30 text-xs mt-1">42,871 yüz · 128 KB</p>
+                </div>
+              </div>
+
+              {/* Right panel quick stats */}
+              <div className="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col gap-2">
+                {['Döndür', 'Yakınlaş', 'Kesit'].map(t => (
+                  <div key={t} className="px-2.5 py-1 glass-panel rounded-lg text-[10px] text-foreground/40 font-medium border-white/5">
+                    {t}
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Glow under card */}
+          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-2/3 h-12 bg-primary/20 blur-2xl rounded-full" />
+        </motion.div>
+      </section>
+
+      {/* ── STATS ─────────────────────────────────────── */}
+      <section className="relative w-full py-24 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {stats.map((s, i) => (
+              <motion.div
+                key={i}
+                custom={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="glass-card rounded-2xl p-6 text-center card-hover"
+              >
+                <div className="text-4xl font-bold stat-number">
+                  {s.value}<span className="text-2xl">{s.suffix}</span>
+                </div>
+                <div className="text-foreground/40 text-sm mt-2 font-medium">{s.label}</div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="w-full max-w-5xl mx-auto px-4 py-24 z-10 mb-12">
-        <div className="glass-panel rounded-3xl p-12 text-center relative overflow-hidden border-primary/30">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 pointer-events-none" />
-          <h2 className="text-3xl md:text-5xl font-bold mb-6 text-glow">Hemen İncelemeye Başlayın</h2>
-          <p className="text-lg text-foreground/80 mb-10 max-w-xl mx-auto">
-            3D tasarım dosyalarınızı tarayıcıya sürükleyin ve ekibinizle anında geri bildirim döngüsüne girin.
-          </p>
-          <Link href="/viewer" className="inline-flex h-14 px-10 rounded-xl bg-primary text-primary-foreground font-semibold text-lg items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-[0_0_30px_rgba(14,165,233,0.5)]">
-            <UploadCloud className="w-5 h-5" />
-            <span>Modele Git</span>
-          </Link>
+      {/* ── HOW IT WORKS ─────────────────────────────── */}
+      <section className="relative w-full py-24 px-4">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/10 text-accentGlow text-xs font-bold uppercase tracking-widest mb-4">
+              Nasıl Çalışır?
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+              3 Adımda <span className="gradient-text">Hazır</span>
+            </h2>
+            <p className="text-foreground/50 max-w-xl mx-auto">
+              Kayıt olmadan, kurulum yapmadan — hemen başlayın.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+            {/* Connector line */}
+            <div className="hidden md:block absolute top-10 left-1/3 right-1/3 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+
+            {steps.map((step, i) => (
+              <motion.div
+                key={i}
+                custom={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="glass-card rounded-3xl p-8 text-center card-hover relative"
+              >
+                <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                  <span className="text-primary font-bold text-lg font-mono">{step.num}</span>
+                </div>
+                <h3 className="text-xl font-bold mb-3">{step.title}</h3>
+                <p className="text-foreground/50 text-sm leading-relaxed">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURES GRID ─────────────────────────────── */}
+      <section className="relative w-full py-24 px-4">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-accent/5 rounded-full blur-[100px]" />
+        </div>
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primaryGlow text-xs font-bold uppercase tracking-widest mb-4">
+              Özellikler
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+              Mühendisler İçin <span className="gradient-text">Tasarlandı</span>
+            </h2>
+            <p className="text-foreground/50 max-w-xl mx-auto">
+              Güçlü araçlar, sıfır karmaşıklık. Tarayıcınız tek ihtiyacınız.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {features.map((f, i) => (
+              <motion.div
+                key={i}
+                custom={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                className="glass-card rounded-2xl p-7 card-hover relative overflow-hidden group"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                <div className="relative">
+                  <div className={`w-11 h-11 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center mb-5 ${f.iconColor}`}>
+                    {f.icon}
+                  </div>
+                  <h3 className="text-lg font-bold mb-2">{f.title}</h3>
+                  <p className="text-foreground/50 text-sm leading-relaxed">{f.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHY SECTION ────────────────────────────────── */}
+      <section className="relative w-full py-24 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="glass-card rounded-3xl p-10 md:p-16 grid grid-cols-1 md:grid-cols-2 gap-10 items-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+
+            <div className="relative">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-teal/30 bg-teal/10 text-teal text-xs font-bold uppercase tracking-widest mb-5">
+                Neden OpenCAD?
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                Masaüstü Yazılımın<br /><span className="gradient-text">Sınırlarını Kırın</span>
+              </h2>
+              <p className="text-foreground/55 leading-relaxed mb-8">
+                Geleneksel CAD araçları pahalı lisanslar, karmaşık kurulumlar ve platform bağımlılığı getirir. OpenCAD tüm bunları tarayıcıya taşır.
+              </p>
+              <div className="space-y-3">
+                {[
+                  "Herhangi bir cihazda, herhangi bir tarayıcıda",
+                  "İnternet bağlantısı gerektirmez (yerel mod)",
+                  "Ekiple gerçek zamanlı yorum ve inceleme",
+                  "Dosyalarınız asla sunucuya gönderilmez",
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-teal flex-shrink-0" />
+                    <span className="text-foreground/70 text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative grid grid-cols-2 gap-4">
+              {[
+                { icon: <ShieldCheck className="w-6 h-6" />, label: "Gizlilik Korumalı", color: "text-teal", bg: "bg-teal/10 border-teal/20" },
+                { icon: <Zap className="w-6 h-6" />, label: "Anında Yükleme", color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/20" },
+                { icon: <Cpu className="w-6 h-6" />, label: "GPU Hızlandırmalı", color: "text-primaryGlow", bg: "bg-primary/10 border-primary/20" },
+                { icon: <Globe className="w-6 h-6" />, label: "Açık Kaynak", color: "text-accentGlow", bg: "bg-accent/10 border-accent/20" },
+              ].map((item, i) => (
+                <div key={i} className={`${item.bg} border rounded-2xl p-5 flex flex-col gap-3`}>
+                  <div className={item.color}>{item.icon}</div>
+                  <span className="text-sm font-semibold text-foreground/80">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ─────────────────────────────────────────── */}
+      <section className="relative w-full py-24 px-4 mb-12">
+        <div className="max-w-4xl mx-auto text-center relative">
+          {/* Glow */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/15 via-accent/10 to-primary/15 rounded-3xl blur-2xl" />
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="glass-card rounded-3xl p-12 md:p-16 relative overflow-hidden border-primary/20"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-accent/8" />
+            <div className="relative">
+              <div className="text-6xl mb-6">🚀</div>
+              <h2 className="text-4xl md:text-5xl font-bold mb-5 text-glow">
+                Hemen Başla — <span className="gradient-text">Ücretsiz</span>
+              </h2>
+              <p className="text-lg text-foreground/55 max-w-xl mx-auto mb-10">
+                Kayıt gerektirmez. Dosyanı sürükle, 3D&apos;de incele, ekiple paylaş.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/viewer"
+                  className="btn-primary h-14 px-10 rounded-2xl text-white font-bold text-base flex items-center gap-2.5 group"
+                >
+                  <UploadCloud className="w-5 h-5" />
+                  Görüntüleyiciyi Aç
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
     </main>

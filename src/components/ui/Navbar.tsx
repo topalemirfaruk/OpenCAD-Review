@@ -4,98 +4,166 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { Box, Github, UploadCloud, LogOut, UserCircle } from 'lucide-react';
+import { Box, Github, UploadCloud, LogOut, UserCircle, Menu, X } from 'lucide-react';
 import { useAuthSync } from '../../store/authStore';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { AuthModal } from './AuthModal';
 
+const navLinks = [
+    { label: 'Ana Sayfa', href: '/' },
+    { label: 'Çalışma Alanı', href: '/viewer' },
+    { label: 'SSS', href: '/faq' },
+    { label: 'Dökümanlar', href: 'https://github.com/topalemirfaruk/OpenCAD-Review?tab=readme-ov-file', external: true },
+];
+
 export function Navbar() {
     const pathname = usePathname();
     const { isAuthenticated, user, isLoading } = useAuthSync();
     const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
 
     return (
         <>
             <motion.header
-                initial={{ y: -100 }}
-                animate={{ y: 0 }}
-                className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-border/50"
+                initial={{ y: -100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className="fixed top-0 left-0 right-0 z-50"
             >
-                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 group-hover:bg-primary/30 transition-colors">
-                            <Box className="w-5 h-5 text-primary" />
-                        </div>
-                        <span className="font-bold text-xl tracking-tight text-glow">OpenCAD</span>
-                    </Link>
+                <div className="mx-4 mt-3">
+                    <div className="max-w-6xl mx-auto glass-panel rounded-2xl border-borderLight/60 px-5 h-14 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+                        {/* Logo */}
+                        <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
+                            <div className="w-7 h-7 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+                                <Box className="w-4 h-4 text-primaryGlow" />
+                            </div>
+                            <span className="font-bold text-base tracking-tight text-foreground/90 group-hover:text-foreground transition-colors">
+                                OpenCAD
+                            </span>
+                        </Link>
 
-                    <nav className="hidden md:flex items-center gap-6">
-                        <Link href="/" className={`text-sm font-medium transition-colors ${pathname === '/' ? 'text-primary' : 'text-foreground/70 hover:text-foreground'}`}>
-                            Ana Sayfa
-                        </Link>
-                        <Link href="/viewer" className={`text-sm font-medium transition-colors ${pathname === '/viewer' ? 'text-primary' : 'text-foreground/70 hover:text-foreground'}`}>
-                            Çalışma Alanı
-                        </Link>
-                        <Link href="/faq" className={`text-sm font-medium transition-colors ${pathname === '/faq' ? 'text-primary' : 'text-foreground/70 hover:text-foreground'}`}>
-                            SSS
-                        </Link>
-                        <Link href="https://github.com/topalemirfaruk/OpenCAD-Review?tab=readme-ov-file" target="_blank" className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors">
-                            Dokümantasyon
-                        </Link>
-                    </nav>
+                        {/* Desktop Nav */}
+                        <nav className="hidden md:flex items-center gap-1">
+                            {navLinks.map(link => (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    target={link.external ? '_blank' : undefined}
+                                    className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-all ${pathname === link.href
+                                            ? 'text-primaryGlow bg-primary/10'
+                                            : 'text-foreground/50 hover:text-foreground/90 hover:bg-white/5'
+                                        }`}
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
+                        </nav>
 
-                    <div className="flex items-center gap-3">
-                        {isLoading ? (
-                            <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                        ) : !isAuthenticated ? (
-                            <button
-                                onClick={() => setIsAuthOpen(true)}
-                                className="hidden sm:flex items-center gap-2 text-foreground/80 hover:text-primary transition-all text-xs font-bold px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-primary/50 hover:bg-primary/5 group/btn"
-                            >
-                                <UserCircle className="w-4 h-4 text-foreground/40 group-hover/btn:text-primary transition-colors" />
-                                <span>Giriş Yap</span>
-                            </button>
-                        ) : (
-                            <div className="flex items-center gap-2">
-                                <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
-                                    <div className="w-6 h-6 rounded-lg overflow-hidden border border-primary/30 relative">
-                                        {user?.avatar && (
-                                            <Image
-                                                src={user.avatar}
-                                                alt={user.name || 'User'}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        )}
+                        {/* Right Actions */}
+                        <div className="flex items-center gap-2">
+                            {isLoading ? (
+                                <div className="w-4 h-4 border-2 border-primary/30 border-t-primaryGlow rounded-full animate-spin" />
+                            ) : !isAuthenticated ? (
+                                <button
+                                    onClick={() => setIsAuthOpen(true)}
+                                    className="hidden sm:flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-xl text-foreground/60 hover:text-foreground/90 hover:bg-white/5 transition-all border border-transparent hover:border-borderLight"
+                                >
+                                    <UserCircle className="w-4 h-4" />
+                                    Giriş Yap
+                                </button>
+                            ) : (
+                                <div className="hidden sm:flex items-center gap-2">
+                                    <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-primary/10 border border-primary/20">
+                                        <div className="w-5 h-5 rounded-lg overflow-hidden border border-primary/30 relative flex-shrink-0">
+                                            {user?.avatar ? (
+                                                <Image src={user.avatar} alt={user.name || 'User'} fill className="object-cover" />
+                                            ) : (
+                                                <UserCircle className="w-5 h-5 text-primaryGlow" />
+                                            )}
+                                        </div>
+                                        <span className="text-xs font-semibold text-foreground/80">{user?.name}</span>
                                     </div>
-                                    <div className="flex flex-col text-left">
-                                        <span className="text-[11px] font-bold text-foreground leading-none">{user?.name}</span>
-                                        <span className="text-[9px] text-foreground/40 font-medium leading-none mt-0.5">{user?.role}</span>
-                                    </div>
+                                    <button
+                                        onClick={() => signOut({ callbackUrl: '/' })}
+                                        className="p-1.5 text-foreground/30 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                                        title="Çıkış Yap"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                    </button>
                                 </div>
+                            )}
+
+                            <Link
+                                href="https://github.com/topalemirfaruk/OpenCAD-Review"
+                                target="_blank"
+                                className="p-1.5 text-foreground/40 hover:text-foreground/80 hover:bg-white/5 rounded-lg transition-all"
+                            >
+                                <Github className="w-4 h-4" />
+                            </Link>
+
+                            <Link
+                                href="/viewer"
+                                className="btn-primary hidden sm:flex h-8 items-center px-4 rounded-xl text-white font-semibold text-xs gap-1.5"
+                            >
+                                <UploadCloud className="w-3.5 h-3.5" />
+                                Model Yükle
+                            </Link>
+
+                            {/* Mobile toggle */}
+                            <button
+                                className="md:hidden p-1.5 text-foreground/50 hover:text-foreground rounded-lg transition-colors"
+                                onClick={() => setIsMobileOpen(!isMobileOpen)}
+                            >
+                                {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Mobile Menu */}
+                    {isMobileOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="max-w-6xl mx-auto glass-panel rounded-2xl border-borderLight/60 mt-2 p-4 flex flex-col gap-2"
+                        >
+                            {navLinks.map(link => (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    target={link.external ? '_blank' : undefined}
+                                    onClick={() => setIsMobileOpen(false)}
+                                    className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${pathname === link.href
+                                            ? 'text-primaryGlow bg-primary/10'
+                                            : 'text-foreground/60 hover:text-foreground hover:bg-white/5'
+                                        }`}
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
+                            <div className="h-px bg-border/50 my-1" />
+                            {!isAuthenticated ? (
+                                <button
+                                    onClick={() => { setIsAuthOpen(true); setIsMobileOpen(false); }}
+                                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-foreground/60 hover:text-foreground hover:bg-white/5 transition-all"
+                                >
+                                    <UserCircle className="w-4 h-4" />
+                                    Giriş Yap
+                                </button>
+                            ) : (
                                 <button
                                     onClick={() => signOut({ callbackUrl: '/' })}
-                                    className="p-2 text-foreground/40 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all group"
-                                    title="Çıkış Yap"
+                                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-400/10 transition-all"
                                 >
                                     <LogOut className="w-4 h-4" />
+                                    Çıkış Yap
                                 </button>
-                            </div>
-                        )}
-
-                        <Link href="https://github.com/topalemirfaruk/OpenCAD-Review?tab=readme-ov-file" target="_blank" className="text-foreground/70 hover:text-foreground transition-colors p-2 hover:bg-white/5 rounded-full">
-                            <Github className="w-5 h-5" />
-                        </Link>
-                        <Link href="/viewer" className="hidden sm:flex h-9 items-center justify-center px-4 rounded-md bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors gap-2 shadow-[0_0_15px_rgba(14,165,233,0.3)]">
-                            <UploadCloud className="w-4 h-4" />
-                            <span>Model Yükle</span>
-                        </Link>
-                    </div>
+                            )}
+                        </motion.div>
+                    )}
                 </div>
             </motion.header>
 
-            {/* Auth Modal */}
             <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
         </>
     );
