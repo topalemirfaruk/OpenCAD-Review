@@ -1,130 +1,157 @@
-/**
- * modelStore.ts
- *
- * Persistent local model storage using:
- * - IndexedDB  → actual file binary (ArrayBuffer or text)
- * - localStorage → lightweight metadata list (name, size, format, date)
- *
- * This is 100% client-side — nothing ever leaves the browser.
- */
+import { supabase } from '@/lib/supabase';
 
 export interface SavedModel {
     id: string;
     name: string;
-    size: number;      // bytes
-    format: string;    // 'stl' | 'obj'
-    savedAt: string;   // ISO string
+    size: number;
+    format: string;
+    file_path: string;
+    user_id?: string;
+    user_name?: string;
+    user_email?: string;
+    user_avatar?: string;
     views: number;
+    created_at: string;
 }
 
-// ─── localStorage metadata ──────────────────────────────────────────────────
+// ─── Cloud Storage (Supabase) ───────────────────────────────────────────────
 
-const META_KEY = 'opencad_models_meta';
-
-export function getModelsMeta(): SavedModel[] {
-    if (typeof window === 'undefined') return [];
-    try {
-        return JSON.parse(localStorage.getItem(META_KEY) || '[]');
-    } catch {
-        return [];
-    }
-}
-
-function setModelsMeta(models: SavedModel[]) {
-    localStorage.setItem(META_KEY, JSON.stringify(models));
-}
-
-export function incrementModelViews(id: string) {
-    const models = getModelsMeta();
-    const idx = models.findIndex(m => m.id === id);
-    if (idx !== -1) {
-        models[idx].views = (models[idx].views || 0) + 1;
-        setModelsMeta(models);
-    }
-}
-
-export function deleteModelMeta(id: string) {
-    setModelsMeta(getModelsMeta().filter(m => m.id !== id));
-}
-
-// ─── IndexedDB file storage ─────────────────────────────────────────────────
-
-const DB_NAME = 'opencad_files';
-const DB_VERSION = 1;
-const STORE_NAME = 'files';
-
-function openDB(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-        const req = indexedDB.open(DB_NAME, DB_VERSION);
-        req.onupgradeneeded = () => {
-            req.result.createObjectStore(STORE_NAME);
-        };
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-    });
-}
-
-export async function saveFileToIDB(id: string, data: ArrayBuffer | string) {
-    const db = await openDB();
-    return new Promise<void>((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        tx.objectStore(STORE_NAME).put(data, id);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-    });
-}
-
-export async function loadFileFromIDB(id: string): Promise<ArrayBuffer | string | null> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readonly');
-        const req = tx.objectStore(STORE_NAME).get(id);
-        req.onsuccess = () => resolve(req.result ?? null);
-        req.onerror = () => reject(req.error);
-    });
-}
-
-export async function deleteFileFromIDB(id: string) {
-    const db = await openDB();
-    return new Promise<void>((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        tx.objectStore(STORE_NAME).delete(id);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-    });
-}
-
-// ─── Combined save / delete ─────────────────────────────────────────────────
-
-export async function saveModel(
+export async function uploadModel(
     file: File,
     data: ArrayBuffer | string,
-    ext: string
+    ext: string,
+    user: { id?: string; name?: string; email?: string; avatar?: string } | null = null
 ): Promise<SavedModel> {
-    const id = `model_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const timestamp = Date.now();
+    const randomHex = Math.random().toString(36).substring(2, 8);
+    const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
+    const filePath = `${user?.id || 'anonymous'}/${timestamp}_${randomHex}_${safeName}`;
 
-    const meta: SavedModel = {
-        id,
-        name: file.name,
-        size: file.size,
-        format: ext.toUpperCase(),
-        savedAt: new Date().toISOString(),
-        views: 0,
-    };
+    // 1. Upload file binary to Supabase Storage bucket 'models'
+    const { error: storageError } = await supabase.storage
+        .from('models')
+        .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+        });
 
-    // Save file binary to IndexedDB
-    await saveFileToIDB(id, data);
+    if (storageError) {
+        console.error('Storage Upload Error:', storageError);
+        throw new Error('Dosya buluta yüklenemedi.');
+    }
 
-    // Save metadata to localStorage
-    const models = getModelsMeta();
-    setModelsMeta([meta, ...models]);
+    // 2. Insert metadata into Supabase Database table 'models'
+    const { data: dbData, error: dbError } = await supabase
+        .from('models')
+        .insert([
+            {
+                name: file.name,
+                size: file.size,
+                format: ext.toUpperCase(),
+                file_path: filePath,
+                user_id: user?.id || null,
+                user_name: user?.name || null,
+                user_email: user?.email || null,
+                user_avatar: user?.avatar || null,
+            }
+        ])
+        .select()
+        .single();
 
-    return meta;
+    if (dbError) {
+        console.error('Database Insert Error:', dbError);
+        // Fallback cleanup if DB fails but storage succeeded
+        await supabase.storage.from('models').remove([filePath]);
+        throw new Error('Model veritabanına kaydedilemedi.');
+    }
+
+    return dbData as SavedModel;
 }
 
-export async function deleteModel(id: string) {
-    deleteModelMeta(id);
-    await deleteFileFromIDB(id);
+export async function getModelsMeta(): Promise<SavedModel[]> {
+    const { data: session } = await supabase.auth.getSession();
+    const userId = session?.session?.user?.id;
+
+    if (!userId) return [];
+
+    const { data, error } = await supabase
+        .from('models')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Fetch Models Error:', error);
+        return [];
+    }
+
+    return data || [];
+}
+
+export async function getModelById(id: string): Promise<SavedModel | null> {
+    const { data, error } = await supabase
+        .from('models')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error || !data) {
+        console.error('Fetch Model Error:', error);
+        return null;
+    }
+    return data;
+}
+
+export async function incrementModelViews(id: string) {
+    // Basic increment via RPC would be better, but doing a read-update for simplicity without creating custom SQL functions
+    const model = await getModelById(id);
+    if (model) {
+        await supabase
+            .from('models')
+            .update({ views: model.views + 1 })
+            .eq('id', id);
+    }
+}
+
+export async function deleteModel(id: string, filePath: string) {
+    // 1. Delete from storage
+    if (filePath) {
+        const { error: storageError } = await supabase.storage
+            .from('models')
+            .remove([filePath]);
+
+        if (storageError) console.error('Storage Delete Error:', storageError);
+    }
+
+    // 2. Delete from database
+    const { error: dbError } = await supabase
+        .from('models')
+        .delete()
+        .eq('id', id);
+
+    if (dbError) {
+        console.error('Database Delete Error:', dbError);
+        throw new Error('Model veritabanından silinemedi.');
+    }
+}
+
+export async function downloadFileFromCloud(filePath: string): Promise<ArrayBuffer | string> {
+    const { data, error } = await supabase.storage
+        .from('models')
+        .download(filePath);
+
+    if (error || !data) {
+        throw new Error('Dosya buluttan indirilemedi.');
+    }
+
+    // Determine if it should be text or arraybuffer based on extension
+    const ext = filePath.split('.').pop()?.toLowerCase();
+
+    if (ext === 'obj') {
+        return await data.text();
+    } else {
+        return await data.arrayBuffer();
+    }
 }
 
 // ─── Human-readable helpers ─────────────────────────────────────────────────

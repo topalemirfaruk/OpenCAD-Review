@@ -13,42 +13,55 @@ import Image from 'next/image';
 import { useAuthSync } from '@/store/authStore';
 import {
     getModelsMeta, deleteModel, formatFileSize,
-    relativeTime, type SavedModel
+    relativeTime, downloadFileFromCloud, type SavedModel
 } from '@/store/modelStore';
 import { useViewerStore } from '@/store/viewerStore';
-import { loadFileFromIDB } from '@/store/modelStore';
 
 export default function DashboardPage() {
     const router = useRouter();
-    const { user, isAuthenticated, isLoading } = useAuthSync();
+    const { user, isAuthenticated, isLoading: authLoading } = useAuthSync();
     const { setUploadedFile } = useViewerStore();
 
     const [models, setModels] = useState<SavedModel[]>([]);
     const [search, setSearch] = useState('');
     const [formatFilter, setFormatFilter] = useState<'ALL' | 'STL' | 'OBJ'>('ALL');
     const [openingId, setOpeningId] = useState<string | null>(null);
+    const [isFetching, setIsFetching] = useState(true);
 
-    const refreshModels = useCallback(() => {
-        setModels(getModelsMeta());
-    }, []);
+    const refreshModels = useCallback(async () => {
+        setIsFetching(true);
+        try {
+            const data = await getModelsMeta();
+            setModels(data);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsFetching(false);
+        }
+    }, []); // Removed isAuthenticated dependency since it does not depend on it internally
 
     useEffect(() => {
-        refreshModels();
-    }, [refreshModels]);
+        if (isAuthenticated) {
+            refreshModels();
+        } else if (!authLoading) {
+            setIsFetching(false);
+        }
+    }, [isAuthenticated, authLoading, refreshModels]);
 
     // Redirect unauthenticated users
     useEffect(() => {
-        if (!isLoading && !isAuthenticated) {
+        if (!authLoading && !isAuthenticated) {
             router.replace('/');
         }
-    }, [isLoading, isAuthenticated, router]);
+    }, [authLoading, isAuthenticated, router]);
 
     const handleOpen = async (model: SavedModel) => {
         setOpeningId(model.id);
         try {
-            const data = await loadFileFromIDB(model.id);
+            // Download binary from Supabase Storage
+            const data = await downloadFileFromCloud(model.file_path);
             if (!data) {
-                alert('Dosya bulunamadı. Tekrar yüklemeniz gerekebilir.');
+                alert('Dosya buluttan indirilemedi.');
                 return;
             }
             const ext = model.format.toLowerCase();
@@ -58,20 +71,27 @@ export default function DashboardPage() {
                 model.name,
                 { type: 'application/octet-stream' }
             );
-            setUploadedFile(file, data, ext);
+
+            // Pass the modelId to the viewer store so it's shareable
+            setUploadedFile(file, data, ext, model.id);
             router.push('/viewer');
         } catch (err) {
             console.error(err);
-            alert('Model açılırken bir hata oluştu.');
+            alert('Model açılırken bir hata oluştu veya dosya silinmiş.');
         } finally {
             setOpeningId(null);
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Bu modeli silmek istediğinize emin misiniz?')) return;
-        await deleteModel(id);
-        refreshModels();
+    const handleDelete = async (model: SavedModel) => {
+        if (!confirm('Bu modeli buluttan kalıcı olarak silmek istediğinize emin misiniz?')) return;
+        try {
+            await deleteModel(model.id, model.file_path);
+            refreshModels();
+        } catch (err) {
+            console.error(err);
+            alert('Model silinirken hata oluştu.');
+        }
     };
 
     // Derived values
@@ -81,16 +101,16 @@ export default function DashboardPage() {
         return matchSearch && matchFormat;
     });
 
-    const totalSize = models.reduce((acc, m) => acc + m.size, 0);
-    const totalViews = models.reduce((acc, m) => acc + m.views, 0);
+    const totalSize = models.reduce((acc, m) => acc + (Number(m.size) || 0), 0);
+    const totalViews = models.reduce((acc, m) => acc + (Number(m.views) || 0), 0);
 
     // ── Loading state ────────────────────────────────────────────────────────
-    if (isLoading) {
+    if (authLoading || (isFetching && models.length === 0)) {
         return (
             <main className="min-h-screen flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-10 h-10 border-2 border-primary/30 border-t-primaryGlow rounded-full animate-spin" />
-                    <p className="text-foreground/40 text-sm">Yükleniyor...</p>
+                    <p className="text-foreground/40 text-sm">Modelleriniz buluttan çekiliyor...</p>
                 </div>
             </main>
         );
@@ -110,7 +130,7 @@ export default function DashboardPage() {
                     </div>
                     <h2 className="text-2xl font-bold mb-3">Giriş Gerekiyor</h2>
                     <p className="text-foreground/50 text-sm mb-7">
-                        Dashboard&apos;a erişmek için Google veya GitHub hesabınızla giriş yapmanız gerekiyor.
+                        Hesabınızın modellerini görüntülemek için giriş yapmalısınız.
                     </p>
                     <Link href="/" className="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm">
                         Ana Sayfaya Dön
@@ -146,7 +166,7 @@ export default function DashboardPage() {
                         <p className="text-foreground/40 text-xs mt-0.5">{user.email}</p>
                     </div>
                 </div>
-                <Link href="/viewer" className="btn-primary h-11 px-6 rounded-xl text-white font-bold flex items-center gap-2 text-sm">
+                <Link href="/viewer" className="btn-primary h-11 px-6 rounded-xl text-white font-bold flex items-center gap-2 text-sm shadow-[0_0_20px_rgba(14,165,233,0.3)]">
                     <Plus size={18} />
                     Yeni Model Yükle
                 </Link>
@@ -155,8 +175,8 @@ export default function DashboardPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
                 {[
-                    { label: 'Kayıtlı Model', value: String(models.length), icon: <Box className="text-primaryGlow w-5 h-5" />, bg: 'bg-primary/10 border-primary/20' },
-                    { label: 'Toplam Boyut', value: formatFileSize(totalSize), icon: <HardDrive className="text-accentGlow w-5 h-5" />, bg: 'bg-accent/10 border-accent/20' },
+                    { label: 'Bulut Modelleri', value: String(models.length), icon: <Box className="text-primaryGlow w-5 h-5" />, bg: 'bg-primary/10 border-primary/20' },
+                    { label: 'Bulut Depolama', value: formatFileSize(totalSize), icon: <HardDrive className="text-accentGlow w-5 h-5" />, bg: 'bg-accent/10 border-accent/20' },
                     { label: 'STL Dosyaları', value: String(models.filter(m => m.format === 'STL').length), icon: <Users className="text-teal w-5 h-5" />, bg: 'bg-teal/10 border-teal/20' },
                     { label: 'Görüntüleme', value: String(totalViews), icon: <Activity className="text-yellow-400 w-5 h-5" />, bg: 'bg-yellow-500/10 border-yellow-500/20' },
                 ].map((stat, i) => (
@@ -205,28 +225,28 @@ export default function DashboardPage() {
             </div>
 
             {/* Model list */}
-            <div className="glass-card rounded-2xl border-borderLight/50 overflow-hidden">
+            <div className="glass-card rounded-2xl border-borderLight/50 overflow-hidden min-h-[400px]">
                 {filtered.length === 0 ? (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="py-20 flex flex-col items-center justify-center text-center px-4"
+                        className="py-24 flex flex-col items-center justify-center text-center px-4"
                     >
-                        <div className="w-20 h-20 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
-                            <FolderOpen className="w-10 h-10 text-primary/50" />
+                        <div className="w-20 h-20 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(14,165,233,0.15)]">
+                            <FolderOpen className="w-10 h-10 text-primaryGlow" />
                         </div>
                         <h3 className="text-xl font-bold mb-3">
-                            {search || formatFilter !== 'ALL' ? 'Sonuç Bulunamadı' : 'Henüz Model Yok'}
+                            {search || formatFilter !== 'ALL' ? 'Sonuç Bulunamadı' : 'Bulut Alanınız Boş'}
                         </h3>
-                        <p className="text-foreground/40 text-sm max-w-sm mb-8">
+                        <p className="text-foreground/40 text-sm max-w-sm mb-8 leading-relaxed">
                             {search || formatFilter !== 'ALL'
                                 ? 'Farklı arama kriterleri deneyin.'
-                                : 'STL veya OBJ dosyanızı yükleyin — tarayıcınıza otomatik kaydedilir.'}
+                                : 'CAD dosyalarınızı güvenli Supabase bulutuna yükleyin. Her cihazdan anında erişin ve ekibinizle paylaşın.'}
                         </p>
                         {!search && formatFilter === 'ALL' && (
                             <Link href="/viewer" className="btn-primary h-11 px-6 rounded-xl text-white font-bold flex items-center gap-2 text-sm">
                                 <UploadCloud size={18} />
-                                İlk Modelini Yükle
+                                Buluta Model Yükle
                             </Link>
                         )}
                     </motion.div>
@@ -277,7 +297,7 @@ export default function DashboardPage() {
                                             <td className="px-6 py-4 hidden md:table-cell">
                                                 <div className="flex items-center gap-2 text-foreground/40">
                                                     <Clock size={13} />
-                                                    <span className="text-xs">{relativeTime(model.savedAt)}</span>
+                                                    <span className="text-xs">{relativeTime(model.created_at)}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
@@ -296,9 +316,9 @@ export default function DashboardPage() {
                                                         <span className="hidden sm:inline">Aç</span>
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDelete(model.id)}
+                                                        onClick={() => handleDelete(model)}
                                                         className="p-2 text-foreground/25 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
-                                                        title="Sil"
+                                                        title="Buluttan Sil"
                                                     >
                                                         <Trash2 size={14} />
                                                     </button>
@@ -315,9 +335,9 @@ export default function DashboardPage() {
 
             {/* Storage info */}
             {models.length > 0 && (
-                <p className="text-center text-foreground/25 text-xs mt-5 flex items-center justify-center gap-1.5">
-                    <ExternalLink size={11} />
-                    Modeller bu tarayıcıda yerel olarak saklanır — başka cihazda görünmez
+                <p className="text-center text-foreground/40 text-xs mt-5 flex items-center justify-center gap-1.5 font-medium">
+                    <ExternalLink size={12} className="text-primary/70" />
+                    Modeller güvenli Supabase cloud sürücünüzde saklanmaktadır — tüm cihazlarınızdan erişebilirsiniz
                 </p>
             )}
         </main>

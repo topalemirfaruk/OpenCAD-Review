@@ -1,72 +1,64 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, UploadCloud, Box } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useViewerStore } from '@/store/viewerStore';
+import { getModelById, downloadFileFromCloud, incrementModelViews } from '@/store/modelStore';
 
 // Lazy-load the viewer components (they pull in Three.js)
 const LeftPanel = dynamic(() => import('@/components/viewer/LeftPanel').then(m => m.LeftPanel), { ssr: false });
 const Viewport = dynamic(() => import('@/components/viewer/Viewport').then(m => m.Viewport), { ssr: false });
 const RightPanel = dynamic(() => import('@/components/viewer/RightPanel').then(m => m.RightPanel), { ssr: false });
 
-function base64ToArrayBuffer(b64: string): ArrayBuffer {
-    const binary = atob(b64);
-    const buf = new ArrayBuffer(binary.length);
-    const view = new Uint8Array(buf);
-    for (let i = 0; i < binary.length; i++) {
-        view[i] = binary.charCodeAt(i);
-    }
-    return buf;
-}
-
-function SharePageContent() {
+function SharePageContent({ id }: { id: string }) {
     const router = useRouter();
     const { setUploadedFile, uploadedFile } = useViewerStore();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
+    const [modelName, setModelName] = useState('Model');
 
     useEffect(() => {
-        const hash = window.location.hash.substring(1); // remove leading #
-        if (!hash) {
+        if (!id) {
             setError('Geçersiz paylaşım linki.');
             setLoading(false);
             return;
         }
 
-        try {
-            const params = new URLSearchParams(hash);
-            const ext = params.get('ext');
-            const name = params.get('name') || `shared_model.${ext}`;
-            const data = params.get('data');
+        async function loadSharedModel() {
+            try {
+                // 1. Fetch metadata
+                const meta = await getModelById(id);
+                if (!meta) throw new Error('Model bulunamadı veya silinmiş.');
+                setModelName(meta.name);
 
-            if (!ext || !data) {
-                throw new Error('Link eksik veri içeriyor.');
+                // 2. Download from storage
+                const data = await downloadFileFromCloud(meta.file_path);
+                if (!data) throw new Error('Dosya içeriği indirilemedi.');
+
+                // 3. Increment view counter (fire and forget)
+                incrementModelViews(id).catch(console.error);
+
+                const ext = meta.format.toLowerCase();
+                const file = new File(
+                    [data instanceof ArrayBuffer ? data : data],
+                    meta.name,
+                    { type: 'application/octet-stream' }
+                );
+
+                setUploadedFile(file, data, ext, meta.id);
+            } catch (err) {
+                console.error(err);
+                const errorMessage = err instanceof Error ? err.message : 'Link bozuk veya erişim izniniz yok.';
+                setError(errorMessage);
+            } finally {
+                setLoading(false);
             }
-
-            let fileData: ArrayBuffer | string;
-            if (ext === 'stl') {
-                fileData = base64ToArrayBuffer(data);
-            } else {
-                // OBJ is text
-                fileData = decodeURIComponent(escape(atob(data)));
-            }
-
-            const file = new File(
-                [fileData instanceof ArrayBuffer ? fileData : fileData],
-                name,
-                { type: 'application/octet-stream' }
-            );
-
-            setUploadedFile(file, fileData, ext);
-        } catch (err) {
-            console.error(err);
-            setError('Link bozuk veya süresi geçmiş olabilir.');
-        } finally {
-            setLoading(false);
         }
-    }, [setUploadedFile]);
+
+        loadSharedModel();
+    }, [id, setUploadedFile]);
 
     if (loading) {
         return (
@@ -74,7 +66,7 @@ function SharePageContent() {
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
                     <Box className="w-7 h-7 text-primaryGlow animate-pulse" />
                 </div>
-                <p className="text-foreground/50 text-sm">Model yükleniyor...</p>
+                <p className="text-foreground/50 text-sm">Model buluttan indiriliyor...</p>
             </div>
         );
     }
@@ -108,7 +100,7 @@ function SharePageContent() {
             <div className="fixed top-16 left-0 right-0 z-40 flex justify-center pointer-events-none">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/15 border border-primary/30 text-xs font-semibold text-primaryGlow backdrop-blur-sm">
                     <Box size={12} />
-                    Paylaşılan Model — {uploadedFile instanceof File ? uploadedFile.name : 'Model'}
+                    Paylaşılan Model — {modelName}
                 </div>
             </div>
 
@@ -123,6 +115,8 @@ function SharePageContent() {
     );
 }
 
-export default function SharePage() {
-    return <SharePageContent />;
+// In Next.js App Router, dynamic route params must be awaited if using React `use()` or passed down
+export default function SharePage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = use(params);
+    return <SharePageContent id={resolvedParams.id} />;
 }
