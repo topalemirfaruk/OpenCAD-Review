@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { UploadCloud, FileBox } from 'lucide-react';
 import { useViewerStore } from '@/store/viewerStore';
+import { saveModel } from '@/store/modelStore';
 
 export function Dropzone() {
     const [isDragActive, setIsDragActive] = useState(false);
     const { setUploadedFile } = useViewerStore();
 
-    const processFile = (file: File) => {
+    const processFile = async (file: File) => {
         const ext = file.name.split('.').pop()?.toLowerCase() || '';
         if (!['stl', 'obj'].includes(ext)) {
             alert('Sadece STL ve OBJ formatları desteklenmektedir.');
@@ -16,10 +17,18 @@ export function Dropzone() {
         }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             const result = e.target?.result;
-            if (result) {
-                setUploadedFile(file, result, ext);
+            if (!result) return;
+
+            // Set in-memory viewer state
+            setUploadedFile(file, result, ext);
+
+            // Also persist to IndexedDB + localStorage
+            try {
+                await saveModel(file, result as ArrayBuffer | string, ext);
+            } catch (err) {
+                console.warn('Model kaydedilemedi:', err);
             }
         };
 
@@ -44,7 +53,6 @@ export function Dropzone() {
         e.preventDefault();
         e.stopPropagation();
         setIsDragActive(false);
-
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             processFile(e.dataTransfer.files[0]);
         }
@@ -85,7 +93,7 @@ export function Dropzone() {
 
                 <h3 className="text-2xl font-bold mb-2">Modelinizi Sürükleyin veya Seçin</h3>
                 <p className="text-foreground/60 max-w-sm mb-6">
-                    Güvenli inceleme için bilgisayarınızdaki CAD dosyalarını yükleyin. Dosyalarınız sunucuya gönderilmez.
+                    Güvenli inceleme için bilgisayarınızdaki CAD dosyalarını yükleyin. Dosyalarınız sunucuya gönderilmez ve tarayıcınıza kaydedilir.
                 </p>
 
                 <div className="flex gap-4 items-center">

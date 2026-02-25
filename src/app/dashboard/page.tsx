@@ -1,28 +1,90 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Plus, Box, Clock, Filter, Search,
-    HardDrive, Users, Activity, UploadCloud, FolderOpen, LogIn
+    HardDrive, Users, Activity, UploadCloud,
+    FolderOpen, LogIn, Trash2, Eye, ExternalLink
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuthSync } from '@/store/authStore';
+import {
+    getModelsMeta, deleteModel, formatFileSize,
+    relativeTime, type SavedModel
+} from '@/store/modelStore';
+import { useViewerStore } from '@/store/viewerStore';
+import { loadFileFromIDB } from '@/store/modelStore';
 
 export default function DashboardPage() {
     const router = useRouter();
     const { user, isAuthenticated, isLoading } = useAuthSync();
+    const { setUploadedFile } = useViewerStore();
 
-    // Redirect to home if not authenticated (after loading)
+    const [models, setModels] = useState<SavedModel[]>([]);
+    const [search, setSearch] = useState('');
+    const [formatFilter, setFormatFilter] = useState<'ALL' | 'STL' | 'OBJ'>('ALL');
+    const [openingId, setOpeningId] = useState<string | null>(null);
+
+    const refreshModels = useCallback(() => {
+        setModels(getModelsMeta());
+    }, []);
+
+    useEffect(() => {
+        refreshModels();
+    }, [refreshModels]);
+
+    // Redirect unauthenticated users
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
             router.replace('/');
         }
     }, [isLoading, isAuthenticated, router]);
 
-    // Loading state
+    const handleOpen = async (model: SavedModel) => {
+        setOpeningId(model.id);
+        try {
+            const data = await loadFileFromIDB(model.id);
+            if (!data) {
+                alert('Dosya bulunamadı. Tekrar yüklemeniz gerekebilir.');
+                return;
+            }
+            const ext = model.format.toLowerCase();
+            // Create a dummy File object so viewerStore is satisfied
+            const file = new File(
+                [data instanceof ArrayBuffer ? data : data],
+                model.name,
+                { type: 'application/octet-stream' }
+            );
+            setUploadedFile(file, data, ext);
+            router.push('/viewer');
+        } catch (err) {
+            console.error(err);
+            alert('Model açılırken bir hata oluştu.');
+        } finally {
+            setOpeningId(null);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Bu modeli silmek istediğinize emin misiniz?')) return;
+        await deleteModel(id);
+        refreshModels();
+    };
+
+    // Derived values
+    const filtered = models.filter(m => {
+        const matchSearch = m.name.toLowerCase().includes(search.toLowerCase());
+        const matchFormat = formatFilter === 'ALL' || m.format === formatFilter;
+        return matchSearch && matchFormat;
+    });
+
+    const totalSize = models.reduce((acc, m) => acc + m.size, 0);
+    const totalViews = models.reduce((acc, m) => acc + m.views, 0);
+
+    // ── Loading state ────────────────────────────────────────────────────────
     if (isLoading) {
         return (
             <main className="min-h-screen flex items-center justify-center">
@@ -34,7 +96,7 @@ export default function DashboardPage() {
         );
     }
 
-    // Not authenticated — show a nice login prompt instead of blank redirect flash
+    // ── Not authenticated ────────────────────────────────────────────────────
     if (!isAuthenticated || !user) {
         return (
             <main className="min-h-screen flex items-center justify-center px-4">
@@ -50,10 +112,7 @@ export default function DashboardPage() {
                     <p className="text-foreground/50 text-sm mb-7">
                         Dashboard&apos;a erişmek için Google veya GitHub hesabınızla giriş yapmanız gerekiyor.
                     </p>
-                    <Link
-                        href="/"
-                        className="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm"
-                    >
+                    <Link href="/" className="btn-primary inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm">
                         Ana Sayfaya Dön
                     </Link>
                 </motion.div>
@@ -61,17 +120,17 @@ export default function DashboardPage() {
         );
     }
 
+    // ── Authenticated ────────────────────────────────────────────────────────
     return (
         <main className="max-w-7xl mx-auto px-4 pt-28 pb-24">
 
-            {/* Header with real user info */}
+            {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10"
             >
                 <div className="flex items-center gap-4">
-                    {/* Avatar */}
                     <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-primary/30 bg-surfaceAlt relative flex-shrink-0">
                         {user.avatar ? (
                             <Image src={user.avatar} alt={user.name} fill className="object-cover" />
@@ -82,18 +141,12 @@ export default function DashboardPage() {
                         )}
                     </div>
                     <div>
-                        <p className="text-foreground/50 text-xs font-semibold uppercase tracking-widest mb-0.5">
-                            Hoş geldin 👋
-                        </p>
+                        <p className="text-foreground/50 text-xs font-semibold uppercase tracking-widest mb-0.5">Hoş geldin 👋</p>
                         <h1 className="text-2xl font-bold">{user.name}</h1>
                         <p className="text-foreground/40 text-xs mt-0.5">{user.email}</p>
                     </div>
                 </div>
-
-                <Link
-                    href="/viewer"
-                    className="btn-primary h-11 px-6 rounded-xl text-white font-bold flex items-center gap-2 text-sm"
-                >
+                <Link href="/viewer" className="btn-primary h-11 px-6 rounded-xl text-white font-bold flex items-center gap-2 text-sm">
                     <Plus size={18} />
                     Yeni Model Yükle
                 </Link>
@@ -102,10 +155,10 @@ export default function DashboardPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
                 {[
-                    { label: 'Toplam Model', value: '0', icon: <Box className="text-primaryGlow w-5 h-5" />, bg: 'bg-primary/10 border-primary/20' },
-                    { label: 'Depolama', value: '0 KB', icon: <HardDrive className="text-accentGlow w-5 h-5" />, bg: 'bg-accent/10 border-accent/20' },
-                    { label: 'Paylaşılan', value: '0', icon: <Users className="text-teal w-5 h-5" />, bg: 'bg-teal/10 border-teal/20' },
-                    { label: 'Görüntüleme', value: '0', icon: <Activity className="text-yellow-400 w-5 h-5" />, bg: 'bg-yellow-500/10 border-yellow-500/20' },
+                    { label: 'Kayıtlı Model', value: String(models.length), icon: <Box className="text-primaryGlow w-5 h-5" />, bg: 'bg-primary/10 border-primary/20' },
+                    { label: 'Toplam Boyut', value: formatFileSize(totalSize), icon: <HardDrive className="text-accentGlow w-5 h-5" />, bg: 'bg-accent/10 border-accent/20' },
+                    { label: 'STL Dosyaları', value: String(models.filter(m => m.format === 'STL').length), icon: <Users className="text-teal w-5 h-5" />, bg: 'bg-teal/10 border-teal/20' },
+                    { label: 'Görüntüleme', value: String(totalViews), icon: <Activity className="text-yellow-400 w-5 h-5" />, bg: 'bg-yellow-500/10 border-yellow-500/20' },
                 ].map((stat, i) => (
                     <motion.div
                         key={i}
@@ -123,55 +176,150 @@ export default function DashboardPage() {
                 ))}
             </div>
 
-            {/* Search + Filter toolbar */}
+            {/* Search + Filter */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
                 <div className="relative w-full sm:w-80">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/30" size={16} />
                     <input
                         type="text"
                         placeholder="Modellerde ara..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
                         className="w-full h-10 bg-surfaceMid/60 border border-borderLight/50 rounded-xl pl-9 pr-4 text-sm focus:outline-none focus:border-primary/50 transition-all text-foreground/80 placeholder:text-foreground/25"
                     />
                 </div>
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <button className="flex-1 sm:flex-none h-10 px-4 rounded-xl glass-card border-borderLight/50 flex items-center justify-center gap-2 text-xs font-bold text-foreground/50 hover:text-foreground hover:border-primary/30 transition-all">
-                        <Filter size={14} /> Filtrele
-                    </button>
-                    <button className="flex-1 sm:flex-none h-10 px-4 rounded-xl glass-card border-borderLight/50 flex items-center justify-center gap-2 text-xs font-bold text-foreground/50 hover:text-foreground hover:border-primary/30 transition-all">
-                        Format: Hepsi
-                    </button>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                    {(['ALL', 'STL', 'OBJ'] as const).map(f => (
+                        <button
+                            key={f}
+                            onClick={() => setFormatFilter(f)}
+                            className={`flex-1 sm:flex-none h-10 px-4 rounded-xl text-xs font-bold transition-all border ${formatFilter === f
+                                ? 'bg-primary/20 border-primary/40 text-primaryGlow'
+                                : 'glass-card border-borderLight/50 text-foreground/50 hover:text-foreground hover:border-primary/30'
+                                }`}
+                        >
+                            {f === 'ALL' ? <><Filter size={12} className="inline mr-1" />Hepsi</> : `.${f}`}
+                        </button>
+                    ))}
                 </div>
             </div>
 
-            {/* Empty State — no models yet */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="glass-card rounded-2xl border-borderLight/50 overflow-hidden"
-            >
-                <div className="py-20 flex flex-col items-center justify-center text-center px-4">
-                    <div className="w-20 h-20 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
-                        <FolderOpen className="w-10 h-10 text-primary/50" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-3">Henüz Model Yok</h3>
-                    <p className="text-foreground/40 text-sm max-w-sm mb-8">
-                        İlk CAD modelinizi yükleyin. STL veya OBJ formatlarını destekliyoruz. Modelleriniz yalnızca cihazınızda işlenir.
-                    </p>
-                    <Link
-                        href="/viewer"
-                        className="btn-primary h-11 px-6 rounded-xl text-white font-bold flex items-center gap-2 text-sm"
+            {/* Model list */}
+            <div className="glass-card rounded-2xl border-borderLight/50 overflow-hidden">
+                {filtered.length === 0 ? (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="py-20 flex flex-col items-center justify-center text-center px-4"
                     >
-                        <UploadCloud size={18} />
-                        İlk Modelini Yükle
-                    </Link>
-                    <p className="text-foreground/25 text-xs mt-5 flex items-center gap-1.5">
-                        <Clock size={11} />
-                        Modeller oturum sonrası saklanmyor — sadece görüntüleme modu
-                    </p>
-                </div>
-            </motion.div>
+                        <div className="w-20 h-20 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
+                            <FolderOpen className="w-10 h-10 text-primary/50" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-3">
+                            {search || formatFilter !== 'ALL' ? 'Sonuç Bulunamadı' : 'Henüz Model Yok'}
+                        </h3>
+                        <p className="text-foreground/40 text-sm max-w-sm mb-8">
+                            {search || formatFilter !== 'ALL'
+                                ? 'Farklı arama kriterleri deneyin.'
+                                : 'STL veya OBJ dosyanızı yükleyin — tarayıcınıza otomatik kaydedilir.'}
+                        </p>
+                        {!search && formatFilter === 'ALL' && (
+                            <Link href="/viewer" className="btn-primary h-11 px-6 rounded-xl text-white font-bold flex items-center gap-2 text-sm">
+                                <UploadCloud size={18} />
+                                İlk Modelini Yükle
+                            </Link>
+                        )}
+                    </motion.div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="border-b border-borderLight/40 bg-surfaceMid/30">
+                                    <th className="px-6 py-4 text-xs font-bold text-foreground/35 uppercase tracking-widest">Model Adı</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-foreground/35 uppercase tracking-widest">Format</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-foreground/35 uppercase tracking-widest">Boyut</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-foreground/35 uppercase tracking-widest hidden md:table-cell">Tarih</th>
+                                    <th className="px-6 py-4 text-xs font-bold text-foreground/35 uppercase tracking-widest text-right">İşlem</th>
+                                </tr>
+                            </thead>
+                            <AnimatePresence>
+                                <tbody className="divide-y divide-borderLight/20">
+                                    {filtered.map((model, i) => (
+                                        <motion.tr
+                                            key={model.id}
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            transition={{ delay: i * 0.04 }}
+                                            className="hover:bg-white/3 transition-colors group"
+                                        >
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center border font-mono text-[10px] font-bold flex-shrink-0 ${model.format === 'STL'
+                                                        ? 'bg-primary/10 border-primary/20 text-primaryGlow'
+                                                        : 'bg-accent/10 border-accent/20 text-accentGlow'
+                                                        }`}>
+                                                        .{model.format}
+                                                    </div>
+                                                    <span className="text-sm font-semibold text-foreground/80 group-hover:text-foreground transition-colors truncate max-w-[180px]">
+                                                        {model.name}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="px-2 py-1 rounded-md bg-white/5 text-[10px] font-bold text-foreground/50 border border-borderLight/30">
+                                                    {model.format}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-foreground/50 font-mono">
+                                                {formatFileSize(model.size)}
+                                            </td>
+                                            <td className="px-6 py-4 hidden md:table-cell">
+                                                <div className="flex items-center gap-2 text-foreground/40">
+                                                    <Clock size={13} />
+                                                    <span className="text-xs">{relativeTime(model.savedAt)}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center justify-end gap-1">
+                                                    <button
+                                                        onClick={() => handleOpen(model)}
+                                                        disabled={openingId === model.id}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-primary text-white text-xs font-bold disabled:opacity-50 transition-all"
+                                                        title="Görüntüleyicide Aç"
+                                                    >
+                                                        {openingId === model.id ? (
+                                                            <div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />
+                                                        ) : (
+                                                            <Eye size={13} />
+                                                        )}
+                                                        <span className="hidden sm:inline">Aç</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(model.id)}
+                                                        className="p-2 text-foreground/25 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                                                        title="Sil"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </motion.tr>
+                                    ))}
+                                </tbody>
+                            </AnimatePresence>
+                        </table>
+                    </div>
+                )}
+            </div>
 
+            {/* Storage info */}
+            {models.length > 0 && (
+                <p className="text-center text-foreground/25 text-xs mt-5 flex items-center justify-center gap-1.5">
+                    <ExternalLink size={11} />
+                    Modeller bu tarayıcıda yerel olarak saklanır — başka cihazda görünmez
+                </p>
+            )}
         </main>
     );
 }
