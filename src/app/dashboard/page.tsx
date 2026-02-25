@@ -29,16 +29,17 @@ export default function DashboardPage() {
     const [isFetching, setIsFetching] = useState(true);
 
     const refreshModels = useCallback(async () => {
+        if (!user?.id) return;
         setIsFetching(true);
         try {
-            const data = await getModelsMeta();
+            const data = await getModelsMeta(user.id);
             setModels(data);
         } catch (err) {
             console.error(err);
         } finally {
             setIsFetching(false);
         }
-    }, []); // Removed isAuthenticated dependency since it does not depend on it internally
+    }, [user?.id]); // Re-fetch when user ID is available
 
     useEffect(() => {
         if (isAuthenticated) {

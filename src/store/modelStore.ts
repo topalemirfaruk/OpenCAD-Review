@@ -68,10 +68,7 @@ export async function uploadModel(
     return dbData as SavedModel;
 }
 
-export async function getModelsMeta(): Promise<SavedModel[]> {
-    const { data: session } = await supabase.auth.getSession();
-    const userId = session?.session?.user?.id;
-
+export async function getModelsMeta(userId: string): Promise<SavedModel[]> {
     if (!userId) return [];
 
     const { data, error } = await supabase
