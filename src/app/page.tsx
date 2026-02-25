@@ -2,7 +2,10 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Eye, Layers, Lock, Share2, UploadCloud, Zap, ArrowRight, Box, Star, CheckCircle2, Globe, Cpu, ShieldCheck } from 'lucide-react';
+import { Eye, Layers, Lock, Share2, UploadCloud, Zap, ArrowRight, Star, CheckCircle2, Globe, Cpu, ShieldCheck } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const HeroScene = dynamic(() => import('@/components/ui/HeroScene').then(m => m.HeroScene), { ssr: false });
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -156,59 +159,43 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* Floating 3D Preview Card */}
+        {/* Real 3D Model Preview */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="relative z-10 mt-20 w-full max-w-3xl mx-auto"
+          className="relative z-10 mt-16 w-full max-w-3xl mx-auto"
         >
-          <div className="relative rounded-3xl glass-card border-primary/20 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5" />
-            <div className="relative p-8 flex items-center justify-center min-h-[260px]">
-              {/* Mock 3D viewer UI */}
-              <div className="absolute top-4 left-4 flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                <div className="w-3 h-3 rounded-full bg-green-500/60" />
-              </div>
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 text-xs text-foreground/30 font-mono">
-                opencad.vercel.app/viewer
-              </div>
+          <div className="relative rounded-3xl glass-card border-primary/20 overflow-hidden" style={{ height: 320 }}>
+            {/* Window chrome */}
+            <div className="absolute top-4 left-4 z-20 flex gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-red-500/70" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
+              <div className="w-3 h-3 rounded-full bg-green-500/70" />
+            </div>
+            <div className="absolute top-3.5 left-1/2 -translate-x-1/2 z-20 text-xs text-foreground/25 font-mono bg-surface/30 px-3 py-0.5 rounded-full backdrop-blur-sm">
+              sample_bunny.stl · 69,630 üçgen
+            </div>
 
-              {/* Center visual */}
-              <div className="flex flex-col items-center gap-4">
-                <motion.div
-                  animate={{ rotateY: [0, 15, -15, 0], rotateX: [0, 10, -5, 0] }}
-                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                  className="w-32 h-32 relative"
-                >
-                  <div className="absolute inset-0 border-2 border-primary/40 rounded-2xl rotate-12" />
-                  <div className="absolute inset-2 border border-accent/30 rounded-xl -rotate-6" />
-                  <div className="absolute inset-4 border border-primaryGlow/20 rounded-xl rotate-3" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Box className="w-12 h-12 text-primary/60" />
-                  </div>
-                </motion.div>
-                <div className="text-center">
-                  <p className="text-foreground/60 text-sm font-medium">model_assembly.stl</p>
-                  <p className="text-foreground/30 text-xs mt-1">42,871 yüz · 128 KB</p>
-                </div>
-              </div>
+            {/* Live 3D scene */}
+            <div className="absolute inset-0">
+              <HeroScene />
+            </div>
 
-              {/* Right panel quick stats */}
-              <div className="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col gap-2">
-                {['Döndür', 'Yakınlaş', 'Kesit'].map(t => (
-                  <div key={t} className="px-2.5 py-1 glass-panel rounded-lg text-[10px] text-foreground/40 font-medium border-white/5">
-                    {t}
-                  </div>
-                ))}
+            {/* Overlay info strip at bottom */}
+            <div className="absolute bottom-0 left-0 right-0 z-20 px-6 py-3 flex items-center justify-between bg-gradient-to-t from-background/80 to-transparent">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-teal animate-pulse" />
+                <span className="text-xs text-foreground/50 font-medium">Stanford Bunny — Örnek Model</span>
               </div>
+              <Link href="/viewer" className="text-[10px] font-bold text-primaryGlow hover:text-white transition-colors uppercase tracking-widest">
+                Kendi Modelini Yükle →
+              </Link>
             </div>
           </div>
 
           {/* Glow under card */}
-          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-2/3 h-12 bg-primary/20 blur-2xl rounded-full" />
+          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-2/3 h-10 bg-primary/15 blur-2xl rounded-full" />
         </motion.div>
       </section>
 
