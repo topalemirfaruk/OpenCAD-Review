@@ -32,11 +32,11 @@ const features = [
     desc: "Tek bağlantı ile ekibinizle veya müşterilerinizle paylaşın. Hesap şartı yok.",
   },
   {
-    icon: <Lock className="w-5 h-5" />,
+    icon: <Globe className="w-5 h-5" />,
     color: 'from-teal/20 to-teal/5',
     iconColor: 'text-teal',
-    title: "Gizlilik Önce",
-    desc: "Modelleriniz sunucuya gönderilmez. Her şey yerel olarak çalışır.",
+    title: "Bulut Senkronizasyonu",
+    desc: "Modelleriniz güvenli Supabase bulutuna yüklenir ve tüm cihazlarınızdan erişilebilir.",
   },
   {
     icon: <Layers className="w-5 h-5" />,
@@ -63,7 +63,7 @@ const features = [
 
 const stats = [
   { value: "3", label: "Desteklenen Format", suffix: "+" },
-  { value: "0", label: "Sunucu Yüklemesi", suffix: "KB" },
+  { value: "Sınırsız", label: "Bulut Depolama", suffix: "" },
   { value: "100", label: "Açık Kaynak", suffix: "%" },
   { value: "∞", label: "Ücretsiz Kullanım", suffix: "" },
 ];
@@ -121,7 +121,7 @@ export default function Home() {
 
           <p className="text-lg md:text-xl text-foreground/55 max-w-2xl mx-auto leading-relaxed mb-10">
             Mühendislik ekipleri için <strong className="text-foreground/80">STL</strong>, <strong className="text-foreground/80">OBJ</strong> ve yakında{' '}
-            <strong className="text-foreground/80">STEP</strong> desteğiyle — kurulum yok, sunucu yok, limit yok.
+            <strong className="text-foreground/80">STEP</strong> desteğiyle — kurulum yok, anlık bulut eşitleme, limit yok.
           </p>
 
           {/* CTAs */}
@@ -337,9 +337,9 @@ export default function Home() {
               <div className="space-y-3">
                 {[
                   "Herhangi bir cihazda, herhangi bir tarayıcıda",
-                  "İnternet bağlantısı gerektirmez (yerel mod)",
-                  "Ekiple gerçek zamanlı yorum ve inceleme",
-                  "Dosyalarınız asla sunucuya gönderilmez",
+                  "Anlık bulut eşitlemesi ile Dashboard erişimi",
+                  "Ekiple gerçek zamanlı bağlantı (UUID) paylaşımı",
+                  "Modeliniz güvenli Supabase altyapısıyla korunur",
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <CheckCircle2 className="w-5 h-5 text-teal flex-shrink-0" />
@@ -351,7 +351,7 @@ export default function Home() {
 
             <div className="relative grid grid-cols-2 gap-4">
               {[
-                { icon: <ShieldCheck className="w-6 h-6" />, label: "Gizlilik Korumalı", color: "text-teal", bg: "bg-teal/10 border-teal/20" },
+                { icon: <ShieldCheck className="w-6 h-6" />, label: "Güvenli Bulut", color: "text-teal", bg: "bg-teal/10 border-teal/20" },
                 { icon: <Zap className="w-6 h-6" />, label: "Anında Yükleme", color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/20" },
                 { icon: <Cpu className="w-6 h-6" />, label: "GPU Hızlandırmalı", color: "text-primaryGlow", bg: "bg-primary/10 border-primary/20" },
                 { icon: <Globe className="w-6 h-6" />, label: "Açık Kaynak", color: "text-accentGlow", bg: "bg-accent/10 border-accent/20" },

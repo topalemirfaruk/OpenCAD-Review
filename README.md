@@ -14,14 +14,19 @@ Proje **Tamamen Açık Kaynak Kodludur (OSS)**. Hassas ve gizli projelerinizi ke
 
 ![OpenCAD Review Workspace](./public/screenshots/viewer-dragon.png)
 
+![OpenCAD Review Dashboard](./public/screenshots/dashboard.png)
+
 ## ✨ Öne Çıkan Özellikler
 
 - **Tarayıcıda 3D Görüntüleme**: WebGL ve Three.js altyapısı ile yüksek performanslı render.
 - **Tak & Çalıştır Formats**: Anında `.stl` ve `.obj` desteği. Sürükle-bırak yöntemiyle saniyeler içinde parse edilir. (STEP desteği için çalışmalar sürüyor).
 - **Premium Arayüz & UX**: Karanlık mod ("cyberpunk grid"), cam paneller (glassmorphism) ve animasyonlu pürüzsüz geçişlerle donatılmış mühendis odaklı minimal arayüz.
 - **İnteraktif Araçlar**: Tel Kafes (Wireframe) görünümü, otomatik döndürme, ve model hiyerarşisi ağacı.
-- **Local Privacy-First**: Tarayıcıda (istemci tarafında) modeller işlenir. Sunucuya ham CAD dosyalarınız **asla** gönderilmez. (Local mode).
-- **Yorumlar & İşbirliği (Geliştiriliyor)**: Tasarım üzerinde tıklanılan noktaya pin/not bırakma ve ekip arkadaşlarıyla koordinasyon (MVP sürümünde sadece arayüz mocking'i vardır).
+- **Güvenli Bulut Depolama**: Modelleriniz Supabase altyapısıyla buluta yüklenir. "Dashboard" üzerinden tüm cihazlarınızdan eski modellerinize tek tıkla ulaşabilirsiniz.
+- **Sınırsız Paylaşım**: Benzersiz (UUID) tabanlı kısa bağlantılar sayesinde her boyuttaki tasarımınızı ekibinizle paylaşın. Karşı tarafın üye olmasına gerek yoktur.
+- **Gelişmiş Kimlik Doğrulama**: NextAuth destekli Google ve GitHub hesaplarıyla saniyeler içinde giriş yapın.
+- **İnteraktif Araçlar**: Tel Kafes (Wireframe) görünümü, otomatik döndürme, ve model hiyerarşisi ağacı.
+- **Yorumlar & İşbirliği**: Tasarım üzerinde tıklanılan noktaya pin/not bırakma (MVP sürümünde sadece arayüz mocking'i vardır).
 
 ## 🚀 Başlangıç & Kurulum (Geliştirici)
 

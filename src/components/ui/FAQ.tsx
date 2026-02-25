@@ -13,7 +13,7 @@ const faqs = [
     {
         category: "Güvenlik",
         question: "Verilerim ve modellerim güvende mi?",
-        answer: "Evet, OpenCAD Review 'Privacy-First' yaklaşımıyla çalışır. Modelleriniz sunucuya asla yüklenmez, doğrudan tarayıcınızda işlenir. Hiç kimse modellerinize erişemez."
+        answer: "Evet, yüklediğiniz tüm modeller Supabase altyapısıyla şifrelenerek bulutta saklanır. Sadece siz ve bağlantıyı ('Link') paylaştığınız kişiler modellerinize erişim sağlayabilir."
     },
     {
         category: "Ücretlendirme",
@@ -33,7 +33,7 @@ const faqs = [
     {
         category: "Paylaşım",
         question: "Model paylaşımı nasıl çalışıyor?",
-        answer: "Viewer'da yüklediğiniz bir modeli paylaşmak için 'Paylaş' butonuna tıklayın. Birleşik bir bağlantı oluşturulur ve bu bağlantıyı ekibinizle paylaşabilirsiniz."
+        answer: "Yüklediğiniz modeller arka planda buluta aktarılır ve kısa bir test bağlantısı (UUID) üretilir. 'Paylaş' butonuyla bu bağlantıyı kopyalayıp gönderdiğiniz herkes (hesap açmadan bile) modeli doğrudan tarayıcısında görüntüleyebilir."
     },
 ];
 
@@ -85,8 +85,8 @@ export function FAQ() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.07 }}
                             className={`glass-card rounded-2xl overflow-hidden border transition-all duration-300 ${openIndex === index
-                                    ? 'border-primary/40 shadow-[0_0_24px_rgba(99,102,241,0.12)]'
-                                    : 'border-borderLight/50 hover:border-borderLight'
+                                ? 'border-primary/40 shadow-[0_0_24px_rgba(99,102,241,0.12)]'
+                                : 'border-borderLight/50 hover:border-borderLight'
                                 }`}
                         >
                             <button
@@ -95,8 +95,8 @@ export function FAQ() {
                             >
                                 <div className="flex items-center gap-3">
                                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${openIndex === index
-                                            ? 'bg-primary/20 text-primaryGlow'
-                                            : 'bg-surfaceMid text-foreground/30'
+                                        ? 'bg-primary/20 text-primaryGlow'
+                                        : 'bg-surfaceMid text-foreground/30'
                                         }`}>
                                         {faq.category}
                                     </span>
