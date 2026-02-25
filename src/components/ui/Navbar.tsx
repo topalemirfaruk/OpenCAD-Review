@@ -10,11 +10,15 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { AuthModal } from './AuthModal';
 
-const navLinks = [
+const publicNavLinks = [
     { label: 'Ana Sayfa', href: '/' },
     { label: 'Çalışma Alanı', href: '/viewer' },
     { label: 'SSS', href: '/faq' },
     { label: 'Dökümanlar', href: 'https://github.com/topalemirfaruk/OpenCAD-Review?tab=readme-ov-file', external: true },
+];
+
+const authNavLinks = [
+    { label: 'Dashboard', href: '/dashboard' },
 ];
 
 export function Navbar() {
@@ -45,11 +49,11 @@ export function Navbar() {
 
                         {/* Desktop Nav */}
                         <nav className="hidden md:flex items-center gap-1">
-                            {navLinks.map(link => (
+                            {[...publicNavLinks, ...(isAuthenticated ? authNavLinks : [])].map(link => (
                                 <Link
                                     key={link.href}
                                     href={link.href}
-                                    target={link.external ? '_blank' : undefined}
+                                    target={(link as { external?: boolean }).external ? '_blank' : undefined}
                                     className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-all ${pathname === link.href
                                             ? 'text-primaryGlow bg-primary/10'
                                             : 'text-foreground/50 hover:text-foreground/90 hover:bg-white/5'
@@ -127,11 +131,11 @@ export function Navbar() {
                             animate={{ opacity: 1, y: 0 }}
                             className="max-w-6xl mx-auto glass-panel rounded-2xl border-borderLight/60 mt-2 p-4 flex flex-col gap-2"
                         >
-                            {navLinks.map(link => (
+                            {[...publicNavLinks, ...(isAuthenticated ? authNavLinks : [])].map(link => (
                                 <Link
                                     key={link.href}
                                     href={link.href}
-                                    target={link.external ? '_blank' : undefined}
+                                    target={(link as { external?: boolean }).external ? '_blank' : undefined}
                                     onClick={() => setIsMobileOpen(false)}
                                     className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${pathname === link.href
                                             ? 'text-primaryGlow bg-primary/10'
